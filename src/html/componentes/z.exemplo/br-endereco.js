@@ -1,6 +1,6 @@
-import { ComponenteVue } from '../componente_vue.js';
+import { ComponenteReativo } from '../componente_reativo.js';
 
-export class BrEndereco extends ComponenteVue {
+export class BrEndereco extends ComponenteReativo {
 
     constructor() {
         super(

@@ -40,6 +40,9 @@
             flex: 0 0 100%;
         }
     }
+    .ativo-destaque {
+        background-color: #eaffea;
+    }
 </style>
 
 <div class="form-container" id="vueapp">
@@ -47,7 +50,7 @@
         <div class="form-row">
             <div class="form-group half-width">
                 <label for="inputNome">Nome</label>
-                <input type="text" id="inputNome" data-mapa='{"value":"nome"}' class='form-control'>
+                <input type="text" id="inputNome" data-ref="campoNome" data-mapa='{"value":"nome"}' class='form-control'>
             </div>
             <div class="form-group half-width">
                 <label for="inputNome2">Nome</label>
@@ -97,30 +100,26 @@
             </div>
         </template>
         <div class="form-row">
-            <div class="form-group full-width">
+            <div class="form-group full-width" data-classe='{"ativo-destaque":"ativo"}' data-estilo='{"border-color":"cor_status"}' style="border: 2px solid transparent; padding: 8px;">
                 <label for="inputAtivo">Ativo</label>
                 <input type="checkbox" id="inputAtivo" data-mapa='{"checked":"ativo"}' class='form-control'>
             </div>
         </div>
-        <!--template data-se="exibir_endereco">
+        <div class="form-row">
+            <div class="form-group full-width">
+                <span data-mapa='{"textContent":"total_enderecos"}'></span> endereço(s) cadastrado(s)
+            </div>
+        </div>
+        <template data-se="exibir_endereco">
             <div id="enderecos">
                 <h1>Endereços</h1>
-                <template data-lista="endereco in enderecos">
-                    <br-endereco                         
+                <template data-lista="endereco, indice in enderecos">
+                    <br-endereco
                         data-mapa='{"data-dados":"endereco"}'>
-                    </br-endereco>            
+                    </br-endereco>
                 </template>
             </div>
-        </template-->
-        <!--br-endereco                         
-            data-dados='{"data-dados":"enderecos.0"}'>
-        </br-endereco-->     
-        <!--br-endereco                         
-            data-mapa='{"data-dados":"enderecos.1"}'>
-        </br-endereco>   
-        <br-endereco                         
-            data-mapa='{"data-dados":"enderecos.0"}'>
-        </br-endereco-->   
-        
+        </template>
+
     </form>
 </div>

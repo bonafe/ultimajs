@@ -11,13 +11,19 @@
 
         window.addEventListener('load', () => {
             const brTeste = document.querySelector('br-teste');
-            brTeste.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {               
+            //O evento também borbulha de qualquer br-endereco aninhado que carregar depois (dentro
+            //da lista de endereços); sem a checagem, cada um deles reexecutava este listener, que
+            //setava data-dados de novo, recriando a lista inteira — loop infinito. Usa
+            //composedPath()[0] em vez de evento.target porque br-endereco tem seu próprio shadow
+            //root: o navegador faz "retargeting" e evento.target aparece como brTeste mesmo vindo
+            //de dentro do br-endereco aninhado.
+            brTeste.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
 
-                console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
-                console.log(`!!!!!!!!!!!!!!!!!!!`);
-                console.log(`!!!!!!!!!!!!!!!!!!!                 brTeste Carregou`);
-                console.log(`!!!!!!!!!!!!!!!!!!!`);
-                console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+                if (evento.composedPath()[0] !== brTeste) {
+                    return;
+                }
+
+                console.log('brTeste carregou');
 
                 let json_dados_pessoa_com_2_enderecos = {
                     nome: 'Fulano de Tal',
