@@ -1,4 +1,5 @@
 import { Elemento } from '../elemento.js';
+import { ComponenteBase } from '../../../componente_base.js';
 
 
 

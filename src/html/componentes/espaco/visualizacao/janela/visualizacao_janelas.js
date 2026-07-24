@@ -3,6 +3,7 @@ import { Visualizacao } from '../visualizacao.js';
 import { ElementoJanela } from './elemento_janela.js';
 import { Evento } from '../../evento.js';
 import { ComponenteBase } from '../../../componente_base.js';
+import { LeitorEspacoDB } from "../../modelo/leitor_espaco_db.js";
 
 
 export class VisualizacaoJanelas extends Visualizacao{
@@ -114,31 +115,44 @@ export class VisualizacaoJanelas extends Visualizacao{
 
 
     criarPainel(elemento){
-        let painel = jsPanel.create({
-            id: `visualizacao_do_Espaco_em_janela_painel_${elemento.uuid}`,
-            theme: 'dark',
-            headerLogo: '<i class="fad fa-home-heart ml-2"></i>',
-            headerTitle: 'Título Elemento visualizacao',
-            headerToolbar: '<span class="text-sm">Just some text in optional header toolbar ...</span>',
-            footerToolbar: '<span class="flex flex-grow">You can have a footer toolbar too</span>'+
-                           '<i class="fal fa-clock mr-2"></i><span class="clock">loading ...</span>',
-            panelSize: {
-                width: () => { return Math.min(800, window.innerWidth*0.9);},
-                height: () => { return Math.min(500, window.innerHeight*0.6);}
-            },
-            animateIn: 'jsPanelFadeIn',
-            onwindowresize: true,
-            callback: painel => {
-                let elemento = document.createElement("elemento-janela");                
-                elemento.setAttribute("uuid_elemento_visualizacao",elemento.uuid)
-                elemento.setAttribute("uuid_visualizacao", this.visualizacao.uuid)                    
-                elemento.setAttribute("uuid_elemento", elemento.uuid_elemento)
-                painel.content.appendChild(elemento);
-                painel.uuid = elemento.uuid;
-            },            
-        });
 
-        this.paineis.push(painel);
+        //Busca a descrição do elemento global para compor um título legível
+        //(o registro "elemento_visualizacao" recebido aqui só tem uuid/importancia/nome do componente)
+        LeitorEspacoDB.getInstance().elemento(elemento.uuid_elemento).then(elementoGlobal => {
+
+            let titulo = `${elementoGlobal?.descricao || 'Elemento'} — ${elemento.componente}`;
+
+            let painel = jsPanel.create({
+                id: `visualizacao_do_Espaco_em_janela_painel_${elemento.uuid}`,
+                theme: 'dark',
+                headerLogo: '<i class="fad fa-home-heart ml-2"></i>',
+                headerTitle: titulo,
+                panelSize: {
+                    width: () => { return Math.min(800, window.innerWidth*0.9);},
+                    height: () => { return Math.min(500, window.innerHeight*0.6);}
+                },
+                animateIn: 'jsPanelFadeIn',
+                onwindowresize: true,
+                callback: painel => {
+                    //Nome diferente de "elemento" de propósito: o parâmetro elemento (dados vindos de
+                    //criarPainel) não pode ser sombreado, senão uuid/uuid_elemento somem (viram undefined).
+                    let elementoJanela = document.createElement("elemento-janela");
+                    elementoJanela.setAttribute("uuid_elemento_visualizacao", elemento.uuid)
+                    elementoJanela.setAttribute("uuid_visualizacao", this.visualizacao.uuid)
+                    elementoJanela.setAttribute("uuid_elemento", elemento.uuid_elemento)
+                    painel.content.appendChild(elementoJanela);
+                    painel.uuid = elemento.uuid;
+                },
+                //Fechar pelo X nativo do jsPanel remove de fato o elemento (o ícone equivalente do
+                //próprio Elemento fica escondido na visão em janelas, ver elemento.js)
+                onclosed: () => {
+                    this.paineis = this.paineis.filter(p => p !== painel);
+                    Evento.dispararEventoExecutarAcao(this, Evento.ACAO_FECHAR_ELEMENTO.nome, {uuid_elemento_visualizacao: elemento.uuid});
+                },
+            });
+
+            this.paineis.push(painel);
+        });
     }
 
 

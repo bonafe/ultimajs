@@ -244,9 +244,18 @@ export class Espaco extends ComponenteBase{
 
         //TODO: só está pegando a primeira visualizacao
         this.visualizacao.visualizacao = {...this.visualizacoes[0]};
-               
+
+        //Os listeners abaixo ficam em "this" (Espaco) e nos controladores, que não são recriados a
+        //cada troca de visualização — só a "visualizacao" (this.visualizacao) muda. Sem essa guarda,
+        //cada chamada de mudarVisualizacao() empilhava mais um listener para os mesmos eventos, e uma
+        //única ação (ex: clicar num item do menu) passava a executar N vezes, duplicando elementos.
+        if (this.listenersDeNavegacaoRegistrados){
+            return;
+        }
+        this.listenersDeNavegacaoRegistrados = true;
+
         //Percorre alguns eventos pré-definidos criando monitoramento para eles
-        [               
+        [
             {evento:Evento.EVENTO_SELECAO_OBJETO},
 
             {evento:Evento.EVENTO_VISUALIZACAO_ATUALIZADA},

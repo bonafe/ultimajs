@@ -35,6 +35,14 @@ export class Elemento extends ComponenteBase {
             //Comportamento navegação
             this.adicionarComportamentoBotoesElementoTreemap();
 
+            //Na visualização em janelas o jsPanel já tem chrome nativo de minimizar/maximizar/fechar/arrastar,
+            //então os ícones equivalentes daqui (que só fazem sentido no treemap, sem chrome de janela) ficam redundantes
+            if (this.tagName.toLowerCase() === 'elemento-janela'){
+                ['minimizar', 'restaurar', 'maximizar', 'fechar'].forEach(id => {
+                    const icone = super.no_raiz.querySelector(`#${id}`);
+                    if (icone) icone.parentElement.style.display = 'none';
+                });
+            }
 
             if (this.componente && !this.carregandoComponente){
 
