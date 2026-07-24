@@ -14,7 +14,15 @@ export class Elemento extends ComponenteBase {
 
         this.dados = null;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {  
+        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
+
+            //O evento também borbulha (bubbles+composed) a partir de qualquer componente carregado
+            //dentro de #containerComponente (ex: visualizador-toque). Sem essa checagem, cada carregamento
+            //do componente filho reentra aqui e chama carregarComponente() de novo, que anexa outra
+            //instância do componente, que dispara outro evento, num loop sem fim.
+            if (evento.target !== this){
+                return;
+            }
 
             this.containerComponente = super.no_raiz.querySelector("#containerComponente");
             this.containerConfiguracao = super.no_raiz.querySelector("#containerConfiguracao");

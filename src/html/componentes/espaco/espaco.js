@@ -311,8 +311,11 @@ export class Espaco extends ComponenteBase{
         
         //URL do arquivo de configuração
         if (nomeAtributo.localeCompare("src") == 0){
-            
-            this._src = novoValor;
+
+            //Resolve para uma URL absoluta: gerarCaminhoAbsolutoURL usa extrairCaminhoURL(this._src)
+            //como base para resolver os caminhos de componentes/controladores, o que falha
+            //(TypeError: Invalid base URL) se _src permanecer um caminho relativo como "./configuracao_ultima.json"
+            this._src = new URL(novoValor, document.baseURI).href;
             fetch(this._src)
                 .then (response => response.json())
                 .then(configuracao => {

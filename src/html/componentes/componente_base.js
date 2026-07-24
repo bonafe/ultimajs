@@ -278,7 +278,7 @@ export class ComponenteBase extends HTMLElement {
                         console.log(`!-!_!-!-!_!_!__!---   Evento ${ComponenteBase.EVENTO_CARREGOU} disparado por ${filho.constructor.name}`);
 
                         //O evento do filho não é propagado
-                        evento.preventDefault();
+                        evento.stopPropagation();
 
                         this.#numero_filhos_carregados++;
 

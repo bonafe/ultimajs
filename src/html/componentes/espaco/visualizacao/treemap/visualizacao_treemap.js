@@ -19,7 +19,12 @@ export class VisualizacaoTreemap extends Visualizacao{
 
         this.cssCarregado = false;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {            
+        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
+
+            //Idem visualizacao.js: ignora eventos borbulhados de descendentes que carregam depois.
+            if (evento.target !== this){
+                return;
+            }
 
             this.container = super.no_raiz.querySelector(".componente_navegacao_visualizacao");
 
@@ -27,8 +32,8 @@ export class VisualizacaoTreemap extends Visualizacao{
                 .then(()=>{
                     this.cssCarregado = true;
                     this.renderizar();
-                });            
-        });        
+                });
+        });
     }
 
 

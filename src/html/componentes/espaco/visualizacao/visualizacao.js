@@ -15,12 +15,19 @@ export class Visualizacao extends ComponenteBase{
 
         this.margemVisualizacao = {top: 0, right: 0, bottom: 0, left: 0};  
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
 
-            this.container = super.no_raiz.querySelector(".componente_navegacao_visualizacao");                              
+            //O evento borbulha (bubbles+composed) a partir de qualquer descendente que carregar depois
+            //(ex: componentes carregados dinamicamente dentro de um elemento do treemap). Sem essa
+            //checagem, cada carregamento de um descendente reentra aqui e re-renderiza à toa.
+            if (evento.target !== this){
+                return;
+            }
+
+            this.container = super.no_raiz.querySelector(".componente_navegacao_visualizacao");
 
             this.renderizar();
-        });        
+        });
     }
 
 
@@ -132,7 +139,18 @@ export class Visualizacao extends ComponenteBase{
 
 
 
-    processarNovasDimensoes(largura, altura){        
+    processarNovasDimensoes(largura, altura){
+
+        //Evita loop de renderização: o ResizeObserver às vezes reporta a mesma dimensão
+        //repetidamente (ex: quando o próprio re-render altera scrollbars/layout), e
+        //re-renderizar sem essa checagem faz o D3 recalcular estilos indefinidamente.
+        if (largura === this.ultimaLarguraObservada && altura === this.ultimaAlturaObservada){
+            return;
+        }
+
+        this.ultimaLarguraObservada = largura;
+        this.ultimaAlturaObservada = altura;
+
         this.renderizar();
     }
 
