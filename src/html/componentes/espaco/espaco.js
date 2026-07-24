@@ -34,10 +34,22 @@ export class Espaco extends ComponenteBase{
 
         this.visualizacao = undefined;
 
-        this.addEventListener('carregou', () => {            
+        //BUG: o nome do evento era a string 'carregou', mas o evento real disparado por
+        //ComponenteBase é EVENTO_CARREGOU ("carregou_componente") — esse listener nunca disparava.
+        //Sem ele, carregarConfiguracao() só era chamado por attributeChangedCallback('src', ...), que
+        //corre em paralelo com o carregamento do próprio template do Espaco: se o fetch da config +
+        //leitura do IndexedDB terminarem antes do template (super.carregado ainda false),
+        //this.renderizar() silenciosamente não faz nada e nada mais tenta de novo depois — a página
+        //fica em branco (mas com os dados intactos no banco). Corrigido para o nome certo do evento,
+        //com checagem de target porque o evento também borbulha de qualquer descendente.
+        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
+
+            if (evento.target !== this){
+                return;
+            }
 
             //this.iniciarServiceWorkers();
-            this.carregarConfiguracao();            
+            this.carregarConfiguracao();
         });
     }
 
@@ -405,6 +417,12 @@ export class Espaco extends ComponenteBase{
         //TODO: considerando apenas um container
         EscritorEspacoDB.getInstance().atualizarVisualizacao(this.visualizacao.visualizacao).then(()=>{
 
+            //Mantém this.visualizacoes[0] sincronizado com o que acabou de ser persistido.
+            //criarEIniciarControleNavegador() usa this.visualizacoes[0] (não o estado da Visualizacao
+            //ativa) para montar a próxima visualização ao trocar — sem isso, qualquer mudança (fechar
+            //elemento, reordenar, etc) ficava só no clone local e "voltava" na próxima troca.
+            this.visualizacoes[0] = structuredClone(this.visualizacao.visualizacao);
+
             //Persistiu a atualização na base
             this.dispatchEvent(new Evento(Evento.EVENTO_VISUALIZACAO_ATUALIZADA,{"uuid_visualizacao":uuid_visualizacao}));
         });
@@ -498,9 +516,13 @@ export class Espaco extends ComponenteBase{
     }
 
     mediaImportancia(elementos){
+        //Sem elementos não há média para tirar: importância 0 faz o D3 treemap desenhar o
+        //retângulo com área zero (altura 0px), deixando o elemento recém-criado invisível.
+        if (elementos.length === 0){
+            return 1;
+        }
         const soma = elementos.reduce((valorAnterior, elementoAtual) => valorAnterior + elementoAtual.importancia, 0);
-        const media = (soma / elementos.length) || 0;
-        return media;
+        return soma / elementos.length;
     }
 
 

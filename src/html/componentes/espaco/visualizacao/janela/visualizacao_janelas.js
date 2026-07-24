@@ -52,6 +52,10 @@ export class VisualizacaoJanelas extends Visualizacao{
 
 
     remover(){
+        //Fecha todos os painéis porque a visualização está sendo trocada/removida, não porque o
+        //usuário pediu para remover cada elemento — o onclosed de criarPainel() precisa distinguir
+        //os dois casos, senão trocar de visualização apaga todos os elementos da base.
+        this.removendoTudo = true;
         this.paineis.forEach(painel => painel.close());
         this.paineis = [];
         super.remover();
@@ -147,6 +151,9 @@ export class VisualizacaoJanelas extends Visualizacao{
                 //próprio Elemento fica escondido na visão em janelas, ver elemento.js)
                 onclosed: () => {
                     this.paineis = this.paineis.filter(p => p !== painel);
+                    if (this.removendoTudo){
+                        return;
+                    }
                     Evento.dispararEventoExecutarAcao(this, Evento.ACAO_FECHAR_ELEMENTO.nome, {uuid_elemento_visualizacao: elemento.uuid});
                 },
             });
