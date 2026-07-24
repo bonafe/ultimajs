@@ -2,7 +2,8 @@
 /*                     ELEMENTOS TREEMAP D3JS             */
 /**********************************************************/
 .node_treemap_d3js {
-    border: solid 1px rgb(0, 0, 0);
+    border: solid 2px var(--cinza-950);
+    background-color: var(--cinza-900);
     font: 10px sans-serif;
     line-height: 12px;
     overflow: auto;

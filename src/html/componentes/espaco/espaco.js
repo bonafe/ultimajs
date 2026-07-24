@@ -155,20 +155,25 @@ export class Espaco extends ComponenteBase{
         //TODO: Deve alterar a exibição caso um novo arquivo seja carregado
         if (super.carregado && this.configuracoesCarregadas && !this.renderizado){
 
+            //Marca ANTES do trabalho assíncrono: carregarConfiguracao() agora pode ser chamado duas
+            //vezes de forma legítima (attributeChangedCallback + EVENTO_CARREGOU), e se this.renderizado
+            //só virasse true no final, as duas chamadas concorrentes passavam pela guarda acima antes de
+            //qualquer uma terminar, duplicando os listeners de clique do cabeçalho (fullscreen,
+            //configuração, ajuda, mudar visualização) — um clique real disparava a ação duas vezes.
+            this.renderizado = true;
+
             this.carregarControladores().then(()=>{
 
                 LeitorEspacoDB.getInstance().visualizacoes().then (visualizacoes => {
-                    
+
                     this.visualizacoes  = visualizacoes;
 
                     this.criarAcoes();
 
                     this.criarEIniciarControleNavegador();
-                    
-                    this.renderizado = true;
-                });                                                             
+                });
             });
-        }       
+        }
     }
 
 

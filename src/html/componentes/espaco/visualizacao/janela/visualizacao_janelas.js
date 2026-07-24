@@ -128,7 +128,8 @@ export class VisualizacaoJanelas extends Visualizacao{
 
             let painel = jsPanel.create({
                 id: `visualizacao_do_Espaco_em_janela_painel_${elemento.uuid}`,
-                theme: 'dark',
+                //Cinza-grafite (mesmo tom da superfície do resto do app) em vez do tema genérico do jsPanel
+                theme: '#1e1c26 filledlight',
                 headerLogo: '<i class="fad fa-home-heart ml-2"></i>',
                 headerTitle: titulo,
                 panelSize: {

@@ -1,4 +1,4 @@
- 
+
 
 .container-ultima{
     width: 100%;
@@ -6,43 +6,53 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;   
-    padding: 0px; 
-    font-size: 1em;    
+    align-items: center;
+    padding: 0px;
+    font-size: 1em;
+    font-family: var(--fonte);
 }
 
   /**********************************************************/
   /*                CABEÇALHO                               */
   /**********************************************************/
-  .cabecalho_principal{      
+  /*Uma única superfície (sem blocos de cor segmentados grudados um no outro)*/
+  .cabecalho_principal{
     width: 100%;
     background-color: var(--cor-fundo-cabecalho);
-    color: white;              
-    display: flex;  
-    border-radius: var(--raio-borda)  var(--raio-borda) 0 0;
-  }    
-  
-  .area-logo{  
-    display: flex;          
-    background-color: rgba(0, 0, 0, 0.5);
+    color: var(--cor-texto-cabecalho);
+    display: flex;
+    align-items: center;
+    border-radius: var(--raio-borda) var(--raio-borda) 0 0;
+    border-bottom: var(--borda-sutil);
+    box-shadow: var(--sombra-elevacao);
+    position: relative;
+    z-index: 1;
+  }
+
+  .area-logo{
+    display: flex;
     justify-content: left;
-    align-items: center;  
-    padding-left: 1em; 
-    border-radius: var(--raio-borda)  var(--raio-borda) var(--raio-borda) 0;    
+    align-items: center;
+    padding: 0.9em 1.2em;
   }
-  
-  .container_logo{     
-    white-space:nowrap;       
+
+  .container_logo{
+    white-space:nowrap;
+    display: flex;
+    align-items: center;
   }
-  
-  .logo_icone_u{                   
+
+  .logo_icone_u{
     color: var(--cor-logo-cabecalho);
-  }  
-  
-  .logo_icone_js{                   
-    color: var(--cor-logo-cabecalho);      
+    font-size: 1.15em !important;
   }
-  
+
+  .logo_icone_js{
+    color: var(--cinza-400);
+    font-size: 0.7em !important;
+    margin-left: 2px;
+  }
+
   .ultima_titulo{
     height: 100%;
     align-self: flex-end;
@@ -50,7 +60,7 @@
     align-items: flex-start;
     color: var(--cor-texto-cabecalho);
     justify-content: left;
-    align-items: center;     
+    align-items: center;
     text-overflow: ellipsis;
     white-space: nowrap;
     padding-left: 1em;
@@ -58,16 +68,17 @@
   }
 
   .ultima_nome{
-    font-family: Tahoma, sans-serif;      
-  }
-  
-  .ultima_descricao{
-    font-family: Tahoma, sans-serif;
-    font-size: x-small;
-    padding: 5px;
+    font-family: var(--fonte);
   }
 
-  
+  .ultima_descricao{
+    font-family: var(--fonte);
+    font-size: x-small;
+    padding: 5px;
+    opacity: 0.8;
+  }
+
+
 
   /**********************************************************/
   /*                CENTRO DO CABEÇALHO                     */
@@ -77,74 +88,75 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;  
+    align-items: center;
   }
-  
-  
+
+
   /**********************************************************/
   /*                NAVEGAÇÃO                               */
   /**********************************************************/
-  .area-navegacao{            
-    padding-right: 10px;
+  /*Mesma superfície do cabeçalho — os controles se diferenciam pelo hover, não por um bloco de cor à parte*/
+  .area-navegacao{
+    padding-right: 6px;
     display: flex;
-    flex-direction: row-reverse;         
-    background-color: var(--cor-fundo-conteudo);
+    flex-direction: row-reverse;
     justify-content: right;
-    align-items: center;     
-    border-radius: var(--raio-borda)  var(--raio-borda)  0 var(--raio-borda);
+    align-items: center;
   }
-  
-  .controle_navegacao_principal{  
-    padding-left: 10px;
-    transition: 0.3s;
-    color: var(--cor-link-cabecalho); 
-    opacity: 0.5;
-    padding: 15px;
+
+  .controle_navegacao_principal{
+    transition: var(--transicao);
+    color: var(--cor-link-cabecalho);
+    padding: 10px;
+    margin: 0 2px;
+    border-radius: var(--raio-borda-pequeno);
     cursor: pointer;
     white-space: nowrap;
+    font-size: 0.95em !important;
+    line-height: 1;
   }
-  
-  .controle_navegacao_principal:hover{  
-    opacity: 1;        
+
+  .controle_navegacao_principal:hover{
+    color: var(--cor-link-hover-cabecalho);
+    background-color: var(--cinza-800);
   }
-  
-  
-  
+
+
+
   /**********************************************************/
   /*                CONTEÚDO PRINCIPAL                      */
   /**********************************************************/
-  .secao_principal_ultima {    
+  .secao_principal_ultima {
     width: 100%;
     height: 100%;
     background-color: var(--cor-fundo-conteudo);
 }
-  
-  
-  
+
+
+
   /**********************************************************/
   /*                     RODAPÉ                             */
   /**********************************************************/
   .rodape_principal{
     display: flex;
     justify-content: center;
-    align-items: center; 
-    height: 3em;
+    align-items: center;
+    height: 2.6em;
     width: 100%;
     background-color: var(--cor-fundo-rodape);
-    color: var(--cor-texto-rodape); 
-    border-radius: 0 0 var(--raio-borda)  var(--raio-borda);
+    color: var(--cor-texto-rodape);
+    border-radius: 0 0 var(--raio-borda) var(--raio-borda);
+    border-top: var(--borda-sutil);
+    font-size: 0.85em;
+    position: relative;
   }
-  
-  .rodape_principal a{  
+
+  .rodape_principal a{
     text-decoration: none;
-    color: var(--cor-link-rodape);      
+    color: var(--cor-link-rodape);
+    transition: var(--transicao);
   }
-  
-  .rodape_principal a:hover{  
-    color: var(--cor-link-hover-rodape);      
+
+  .rodape_principal a:hover{
+    color: var(--cor-link-hover-rodape);
   }
-  
-  
-  
-  
-  
