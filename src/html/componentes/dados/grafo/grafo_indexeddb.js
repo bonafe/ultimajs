@@ -1,5 +1,6 @@
 import { GrafoBases } from "./grafo_bases.js";
 import { Evento } from "../../espaco/evento.js";
+import { ComponenteBase } from "../../componente_base.js";
 
 export class GrafoIndexedDB extends GrafoBases{
 
