@@ -1,0 +1,125 @@
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    .form-container {
+        max-width: 800px;
+        margin: auto;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        margin-bottom: 5px;
+    }
+    .form-control {
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .form-group.half-width {
+        flex: 0 0 48%;
+    }
+    .form-group.third-width {
+        flex: 0 0 31%;
+    }
+    .form-group.full-width {
+        flex: 0 0 100%;
+    }
+    @media (max-width: 600px) {
+        .form-group.half-width, .form-group.third-width {
+            flex: 0 0 100%;
+        }
+    }
+    .active-highlight {
+        background-color: #eaffea;
+    }
+</style>
+
+<div class="form-container" id="vueapp">
+    <form>
+        <div class="form-row">
+            <div class="form-group half-width">
+                <label for="inputName">Name</label>
+                <input type="text" id="inputName" data-ref="nameField" data-bind='{"value":"name"}' class='form-control'>
+            </div>
+            <div class="form-group half-width">
+                <label for="inputName2">Name</label>
+                <input type="text" id="inputName____" data-bind='{"value":"name"}' class='form-control'>
+            </div>
+            <div class="form-group half-width">
+                <label for="inputPhone">Phone</label>
+                <input type="text" id="inputPhone" data-bind='{"value":"phone"}' class='form-control'>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label for="inputEmail">Email</label>
+                <input type="email" id="inputEmail" data-bind='{"value":"email"}' class='form-control'>
+            </div>
+        </div>
+        <template data-if="show_notes">
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="inputNotes">Notes</label>
+                    <input type="text" id="inputNotes" data-bind='{"value":"notes"}' class='form-control'>
+                </div>
+            </div>
+        </template>
+        <template data-else-if="show_address">
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="inputNotes">Notes !!!Else ADDRESS!!!</label>
+                    <input type="text" id="inputNotes" data-bind='{"value":"notes"}' class='form-control'>
+                </div>
+            </div>
+        </template>
+        <template data-else>
+            <div class="form-row" data-else>
+                <div class="form-group full-width">
+                    <label for="inputNotes">Notes ******* Else *******</label>
+                    <input type="text" id="inputNotes" data-bind='{"value":"notes"}' class='form-control'>
+                </div>
+            </div>
+        </template>
+        <template data-else>
+            <div class="form-row" data-else>
+                <div class="form-group full-width">
+                    <label for="inputNotes">Notes ******* Else *******</label>
+                    <input type="text" id="inputNotes" data-bind='{"value":"notes"}' class='form-control'>
+                </div>
+            </div>
+        </template>
+        <div class="form-row">
+            <div class="form-group full-width" data-class='{"active-highlight":"active"}' data-style='{"border-color":"status_color"}' style="border: 2px solid transparent; padding: 8px;">
+                <label for="inputActive">Active</label>
+                <input type="checkbox" id="inputActive" data-bind='{"checked":"active"}' class='form-control'>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group full-width">
+                <span data-bind='{"textContent":"total_addresses"}'></span> address(es) registered
+            </div>
+        </div>
+        <template data-if="show_address">
+            <div id="addresses">
+                <h1>Addresses</h1>
+                <template data-for="address, index in addresses : zip">
+                    <br-address
+                        data-bind='{"data-state":"address"}'>
+                    </br-address>
+                </template>
+            </div>
+        </template>
+
+    </form>
+</div>

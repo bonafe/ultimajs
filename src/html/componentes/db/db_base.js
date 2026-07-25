@@ -19,7 +19,7 @@ export class DBBase extends EventTarget{
         this.funcoesDeUpgradeVersao = funcoesDeUpgradeVersao;
 
         this.banco = undefined;
-        this.carregado = false;
+        this.loaded = false;
         this.atualizandoBanco = false;
         this.abrirBanco();
     }
@@ -28,7 +28,7 @@ export class DBBase extends EventTarget{
 
     aguardarBanco(){
         return new Promise ((resolve, reject) => {
-            if (this.carregado){
+            if (this.loaded){
                 resolve (true);
             }else{
                 this.addEventListener(DBBase.EVENTO_BANCO_CARREGADO, ()=>{                    
@@ -102,7 +102,7 @@ export class DBBase extends EventTarget{
 
 
     bancoCarregado(){
-        this.carregado = true;
+        this.loaded = true;
         this.dispatchEvent (new Event(DBBase.EVENTO_BANCO_CARREGADO));
     }
 

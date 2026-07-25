@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Minze — benchmark implementation</title>
+</head>
+<body>
+
+<bench-counter id="counter"></bench-counter>
+<bench-list id="list"></bench-list>
+<bench-conditional id="conditional"></bench-conditional>
+<bench-binding id="binding"></bench-binding>
+
+<script type="module">
+  import { MinzeElement } from 'https://cdn.jsdelivr.net/npm/minze/+esm';
+
+  class BenchCounter extends MinzeElement {
+    reactive = [['count', 0]]
+    html = () => `<span class="value">${this.count}</span>`
+    reset = () => { this.count = 0 }
+    incrementTimes = (n) => { for (let i = 0; i < n; i++) { this.count++ } }
+    currentValue = () => this.count
+  }
+  BenchCounter.define();
+
+  class BenchConditional extends MinzeElement {
+    reactive = [['open', false]]
+    html = () => this.open
+      ? '<div class="visible-block">visible</div>'
+      : '<div class="hidden-block">hidden</div>'
+    reset = () => { this.open = false }
+    toggleTimes = (n) => { for (let i = 0; i < n; i++) { this.open = !this.open } }
+    currentState = () => this.open
+  }
+  BenchConditional.define();
+
+  class BenchBinding extends MinzeElement {
+    reactive = [['text', '']]
+    html = () => `
+      <input class="field" value="${this.text}" on:input="updateText">
+      <span class="echo">${this.text}</span>
+    `
+    updateText = (e) => { this.text = e.target.value }
+    reset = () => { this.text = '' }
+    writeTimes = (n) => {
+      const field = this.shadowRoot.querySelector('.field');
+      for (let i = 0; i < n; i++) {
+        field.value = `value-${i}`;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+    currentValue = () => this.text
+  }
+  BenchBinding.define();
+
+  const ADJECTIVES = ['fast', 'slow', 'big', 'small', 'blue', 'green', 'red', 'light', 'dark', 'new'];
+  const NOUNS = ['car', 'table', 'cloud', 'river', 'hill', 'wind', 'field', 'port', 'valley', 'lake'];
+  function randomLabel() {
+    const a = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+    const n = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+    return `${a} ${n}`;
+  }
+  let nextId = 1;
+
+  //Follows Minze's own documentation (Advanced > Performance): large arrays shouldn't be declared
+  //"reactive" (per-item cost on every assignment); instead, mutate the plain field and call
+  //this.rerender() manually once.
+  class BenchList extends MinzeElement {
+    rows = []
+    html = () => `
+      <table><tbody>
+        ${this.rows.map(r => `<tr><td class="id-column">${r.id}</td><td class="label-column">${r.label}</td></tr>`).join('')}
+      </tbody></table>
+    `
+    create = (n) => {
+      const rows = [];
+      for (let i = 0; i < n; i++) {
+        rows.push({ id: nextId++, label: randomLabel() });
+      }
+      this.rows = rows;
+      this.rerender();
+    }
+    updatePartial = () => {
+      this.rows = this.rows.map((row, index) =>
+        index % 10 === 0 ? { ...row, label: row.label + ' !!!' } : row
+      );
+      this.rerender();
+    }
+    swap = () => {
+      const rows = this.rows.slice();
+      if (rows.length > 998) {
+        [rows[1], rows[998]] = [rows[998], rows[1]];
+      } else if (rows.length > 1) {
+        [rows[0], rows[rows.length - 1]] = [rows[rows.length - 1], rows[0]];
+      }
+      this.rows = rows;
+      this.rerender();
+    }
+    remove = () => {
+      if (this.rows.length === 0) { return; }
+      this.rows = this.rows.slice(1);
+      this.rerender();
+    }
+    clear = () => { this.rows = []; this.rerender(); }
+    countRows = () => this.rows.length
+  }
+  BenchList.define();
+
+  const elCounter = document.getElementById('counter');
+  const elList = document.getElementById('list');
+  const elConditional = document.getElementById('conditional');
+  const elBinding = document.getElementById('binding');
+
+  window.bench = {
+    ready: Promise.resolve(),
+    counter: {
+      reset: () => elCounter.reset(),
+      increment: (n) => elCounter.incrementTimes(n),
+      currentValue: () => elCounter.currentValue()
+    },
+    list: {
+      create: (n) => elList.create(n),
+      updatePartial: () => elList.updatePartial(),
+      swap: () => elList.swap(),
+      remove: () => elList.remove(),
+      clear: () => elList.clear(),
+      countRows: () => elList.countRows()
+    },
+    conditional: {
+      reset: () => elConditional.reset(),
+      toggle: (n) => elConditional.toggleTimes(n),
+      currentState: () => elConditional.currentState()
+    },
+    binding: {
+      reset: () => elBinding.reset(),
+      write: (n) => elBinding.writeTimes(n),
+      currentValue: () => elBinding.currentValue()
+    }
+  };
+</script>
+
+</body>
+</html>

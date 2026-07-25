@@ -1,25 +1,25 @@
-import { ComponenteBase } from '../../componente_base.js';
+import { ComponentBase } from '../../component_base.js';
 import { Evento } from '../../espaco/evento.js';
 
 
 
-export class VisualizadorSom extends ComponenteBase {
+export class VisualizadorSom extends ComponentBase {
 
 
 
     constructor(){
-        super({templateURL:"./visualizador_som.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./visualizador_som.html", shadowDom:true}, import.meta.url);
 
         this.video = undefined;        
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {                        
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {                        
 
-            this.fontesDeSom = super.no_raiz.querySelector("#fontesDeSom"); 
+            this.fontesDeSom = super.rootNode.querySelector("#fontesDeSom"); 
 
-            this.canvas = super.no_raiz.querySelector("#visualizadorSom");
+            this.canvas = super.rootNode.querySelector("#visualizadorSom");
 
-            this.downloadGravacao = super.no_raiz.querySelector("#downloadGravacao");
-            this.btnGravacao = super.no_raiz.querySelector("#btnGravacao");
+            this.downloadGravacao = super.rootNode.querySelector("#downloadGravacao");
+            this.btnGravacao = super.rootNode.querySelector("#btnGravacao");
 
             this.fontesDeSom.addEventListener("change", ()=>{
                 this.iniciarFonteDeSom();
@@ -38,7 +38,7 @@ export class VisualizadorSom extends ComponenteBase {
                 }
             });
 
-            this.renderizar();
+            this.render();
         });
     }
 
@@ -55,11 +55,11 @@ export class VisualizadorSom extends ComponenteBase {
     
         if (nomeAtributo.localeCompare("dados") == 0){
 
-            this.dados = JSON.parse(novoValor);
-            console.log("Dados visualizador som: %o",this.dados);
+            this.state = JSON.parse(novoValor);
+            console.log("Dados visualizador som: %o",this.state);
 
-            if (this.dados.deviceId && this.fontesDeSom){
-                this.fontesDeSom.value = this.dados.deviceId;
+            if (this.state.deviceId && this.fontesDeSom){
+                this.fontesDeSom.value = this.state.deviceId;
                 this.iniciarFonteDeSom();
             }
         }
@@ -95,9 +95,9 @@ export class VisualizadorSom extends ComponenteBase {
     }
 
 
-    renderizar(){
+    render(){
         
-        if (super.carregado && !this.renderizado){
+        if (super.loaded && !this.renderizado){
             
             this.preencherFontesDeSomDisponiveis().then(()=>{
                 this.iniciarFonteDeSom();            
@@ -232,8 +232,8 @@ export class VisualizadorSom extends ComponenteBase {
                     }
                 });
 
-                if (this.dados && this.dados.deviceId){
-                    this.fontesDeSom.value = this.dados.deviceId;
+                if (this.state && this.state.deviceId){
+                    this.fontesDeSom.value = this.state.deviceId;
                 }
 
                 this.renderizado = true;
@@ -253,8 +253,8 @@ export class VisualizadorSom extends ComponenteBase {
 
     mudouEstado(){
         console.log(`Salvando fonte de Som: ${this.fontesDeSom.value}`);
-        this.dados = {deviceId: this.fontesDeSom.value};
-        this.dispatchEvent(new CustomEvent("change", {detail:this.dados}));
+        this.state = {deviceId: this.fontesDeSom.value};
+        this.dispatchEvent(new CustomEvent("change", {detail:this.state}));
     }
 }
 customElements.define('visualizador-som', VisualizadorSom);

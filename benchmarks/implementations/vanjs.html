@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VanJS — benchmark implementation</title>
+</head>
+<body>
+
+<div id="counter"></div>
+<div id="list"></div>
+<div id="conditional"></div>
+<div id="binding"></div>
+
+<script type="module">
+  import van from 'https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.6.1.min.js';
+
+  const { span, div, table, tbody, tr, td, input } = van.tags;
+
+  const ADJECTIVES = ['fast', 'slow', 'big', 'small', 'blue', 'green', 'red', 'light', 'dark', 'new'];
+  const NOUNS = ['car', 'table', 'cloud', 'river', 'hill', 'wind', 'field', 'port', 'valley', 'lake'];
+  function randomLabel() {
+    const a = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+    const n = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+    return `${a} ${n}`;
+  }
+  let nextId = 1;
+
+  // --- Counter ---
+  const counterState = van.state(0);
+  van.add(document.getElementById('counter'), span({ class: 'value' }, counterState));
+
+  // --- Conditional ---
+  const openState = van.state(false);
+  van.add(document.getElementById('conditional'),
+    () => openState.val
+      ? div({ class: 'visible-block' }, 'visible')
+      : div({ class: 'hidden-block' }, 'hidden')
+  );
+
+  // --- Binding ---
+  const textState = van.state('');
+  const bindingField = input({ type: 'text', class: 'field', value: textState, oninput: (e) => { textState.val = e.target.value; } });
+  van.add(document.getElementById('binding'), bindingField, span({ class: 'echo' }, textState));
+
+  // --- List: no keyed reconciliation (it doesn't exist in VanJS — the DOM nodes returned by
+  // van.tags ARE the real elements; identity is preserved by keeping the node reference, not by a
+  // diffing mechanism). "swap" moves the DOM nodes manually.
+  const listBody = tbody();
+  van.add(document.getElementById('list'), table({}, listBody));
+  let rows = [];
+
+  function create(n) {
+    listBody.replaceChildren();
+    rows = [];
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < n; i++) {
+      const id = nextId++;
+      const labelState = van.state(randomLabel());
+      const dom = tr({}, td({ class: 'id-column' }, id), td({ class: 'label-column' }, labelState));
+      frag.appendChild(dom);
+      rows.push({ id, labelState, dom });
+    }
+    van.add(listBody, frag);
+  }
+
+  function updatePartial() {
+    rows.forEach((row, index) => {
+      if (index % 10 === 0) {
+        row.labelState.val = row.labelState.val + ' !!!';
+      }
+    });
+  }
+
+  function swap() {
+    let i = 1, j = 998;
+    if (rows.length <= 998) {
+      if (rows.length <= 1) { return; }
+      i = 0; j = rows.length - 1;
+    }
+    const domA = rows[i].dom, domB = rows[j].dom;
+    [rows[i], rows[j]] = [rows[j], rows[i]];
+
+    const parent = domA.parentNode;
+    const nextOfA = domA.nextSibling;
+    parent.insertBefore(domA, domB);
+    parent.insertBefore(domB, nextOfA);
+  }
+
+  function remove() {
+    if (rows.length === 0) { return; }
+    const row = rows.shift();
+    row.dom.remove();
+  }
+
+  function clear() {
+    listBody.replaceChildren();
+    rows = [];
+  }
+
+  window.bench = {
+    ready: Promise.resolve(),
+    counter: {
+      reset: () => { counterState.val = 0; },
+      increment: (n) => { for (let i = 0; i < n; i++) { counterState.val++; } },
+      currentValue: () => counterState.val
+    },
+    list: {
+      create,
+      updatePartial,
+      swap,
+      remove,
+      clear,
+      countRows: () => rows.length
+    },
+    conditional: {
+      reset: () => { openState.val = false; },
+      toggle: (n) => { for (let i = 0; i < n; i++) { openState.val = !openState.val; } },
+      currentState: () => openState.val
+    },
+    binding: {
+      reset: () => { textState.val = ''; },
+      write: (n) => {
+        for (let i = 0; i < n; i++) {
+          bindingField.value = `value-${i}`;
+          bindingField.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      },
+      currentValue: () => textState.val
+    }
+  };
+</script>
+
+</body>
+</html>

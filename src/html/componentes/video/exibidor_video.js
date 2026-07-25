@@ -1,19 +1,19 @@
-import { ComponenteBase } from '../componente_base.js';
+import { ComponentBase } from '../component_base.js';
 import { Evento } from '../espaco/evento.js';
 
 
-export class ExibidorVideo extends ComponenteBase {
+export class ExibidorVideo extends ComponentBase {
 
     constructor(){
-        super({templateURL:"./exibidor_video.html", shadowDOM:false}, import.meta.url);
+        super({templateUrl:"./exibidor_video.html", shadowDom:false}, import.meta.url);
 
         this._dados = undefined;
         this.ultimoTempo = 0;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
             
-            window.addEventListener(Evento.EVENTO_PLAYER_YOUTUBE_CARREGADO, ()=> this.renderizar());
-            this.renderizar();
+            window.addEventListener(Evento.EVENTO_PLAYER_YOUTUBE_CARREGADO, ()=> this.render());
+            this.render();
         });
     }
 
@@ -27,18 +27,18 @@ export class ExibidorVideo extends ComponenteBase {
 
     
         if (nomeAtributo.localeCompare("dados") == 0){
-            this.dados = JSON.parse(novoValor);
-            this.renderizar();
+            this.state = JSON.parse(novoValor);
+            this.render();
         }
     }
 
 
 
-    renderizar(){
+    render(){
 
         //TODO: lidar com mudanças nos valores dos dados
         //Se todos os elementos estão prontos e nenhum componente de vídeo foi criado
-        if (super.carregado && YT && this.dados && !this.componenteVideo){
+        if (super.loaded && YT && this.state && !this.componenteVideo){
             
             this.carregarComponenteVideo();                 
         }
@@ -52,19 +52,19 @@ export class ExibidorVideo extends ComponenteBase {
 
         this.componenteVideo = 
             new YT.Player(
-                super.no_raiz.querySelector("#video"), 
+                super.rootNode.querySelector("#video"), 
                 {                  
-                    videoId: this.dados.src,
+                    videoId: this.state.src,
                     events: {
                         'onReady': evento =>{
                             //TODO: deve mesmo começar sempre o vídeo? #ficadica
                             evento.target.playVideo();
-                            this.renderizar();
+                            this.render();
                         },
                         'onStateChange': evento =>{
 
                             this.estadoAtualPlayerVideo = evento.data;
-                            this.renderizar();
+                            this.render();
 
 
                             switch (this.estadoAtualPlayerVideo){
@@ -101,8 +101,8 @@ export class ExibidorVideo extends ComponenteBase {
 
 
     inicializarAcoes(){
-        if (this.dados.acoes){        
-            this.dados.acoes.forEach(acao => {
+        if (this.state.acoes){        
+            this.state.acoes.forEach(acao => {
                 acao.executada = false;
             });
         }
@@ -111,10 +111,10 @@ export class ExibidorVideo extends ComponenteBase {
 
 
     processarAcoes(){
-        if (this.dados && this.componenteVideo){
+        if (this.state && this.componenteVideo){
 
             //TODO: esse IF pode ir para a condição de cima? dá para garantir a ordem que vai acontecer em javascript?            
-            if (this.dados.acoes){ 
+            if (this.state.acoes){ 
 
                 if (this.estadoAtualPlayerVideo == YT.PlayerState.PLAYING){
 
@@ -124,7 +124,7 @@ export class ExibidorVideo extends ComponenteBase {
                     if (this.tempoAtualVideo < this.ultimoTempo){
                         //Significa que voltou o video
                         //Zera a execução das ações do vídeo do ponto atual para frente
-                        this.dados.acoes.filter (acao => acao.tempo >= this.tempoAtualVideo)
+                        this.state.acoes.filter (acao => acao.tempo >= this.tempoAtualVideo)
                             .forEach(acao => {
                                 acao.executada = false;
                             });
@@ -132,7 +132,7 @@ export class ExibidorVideo extends ComponenteBase {
                     this.ultimoTempo = this.tempoAtualVideo;
                                         
                     //Executa as ações que aconteceram desde a última vez que rodou
-                    this.dados.acoes.filter (acao => !acao.executada && (acao.tempo < this.tempoAtualVideo))
+                    this.state.acoes.filter (acao => !acao.executada && (acao.tempo < this.tempoAtualVideo))
                         .forEach(acao => {                            
                             acao.executada = true;
                             this.dispatchEvent (new Evento(Evento.EVENTO_EXECUTAR_ACAO, acao));

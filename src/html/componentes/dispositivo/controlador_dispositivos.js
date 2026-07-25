@@ -2,14 +2,14 @@
 
 
 
-import { ControladorBase } from "../controlador_base.js";
+import { ControllerBase } from "../controller_base.js";
 import { LeitorEspacoDB } from "../espaco/modelo/leitor_espaco_db.js";
 import { Evento } from "../espaco/evento.js";
 
 
 
 
-export class ControladorDispositivos extends ControladorBase{
+export class ControladorDispositivos extends ControllerBase{
 
 
 
@@ -34,10 +34,10 @@ export class ControladorDispositivos extends ControladorBase{
                         
                         let componente = undefined;
 
-                        if (evento.detail.dados.kind == "videoinput"){
+                        if (evento.detail.state.kind == "videoinput"){
                             componente = "exibidor-camera";
 
-                        }else if (['audioinput', 'audiooutput'].indexOf(evento.detail.dados.kind) != -1) {
+                        }else if (['audioinput', 'audiooutput'].indexOf(evento.detail.state.kind) != -1) {
                             componente = "visualizador-som";
                         }
 
@@ -47,7 +47,7 @@ export class ControladorDispositivos extends ControladorBase{
                                 {
                                     "nome_elemento": "Nova exibição dispositivo",
                                     "nome_componente": componente,
-                                    "dados": evento.detail.dados
+                                    "dados": evento.detail.state
                                 }
                             );
                         } 

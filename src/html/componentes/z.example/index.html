@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Example with Two-Way Data Binding</title>
+    <script src="./br-test.js" type="module"></script>
+    <script type="module">
+
+        import {ComponentBase} from '../component_base.js';
+
+        window.addEventListener('load', () => {
+            const brTest = document.querySelector('br-test');
+            //The event also bubbles up from any nested br-address that loads later (inside the
+            //address list); without this check, each one would re-run this listener, which would set
+            //data-state again, rebuilding the whole list — an infinite loop. Uses composedPath()[0]
+            //instead of event.target because br-address has its own shadow root: the browser
+            //"retargets" the event and event.target shows up as brTest even though it came from
+            //inside the nested br-address.
+            brTest.addEventListener(ComponentBase.LOADED_EVENT, (event) => {
+
+                if (event.composedPath()[0] !== brTest) {
+                    return;
+                }
+
+                console.log('brTest loaded');
+
+                let personWith2AddressesJson = {
+                    name: 'John Doe',
+                    phone: '11 99999-9999',
+                    email: 'a@a.com',
+                    addresses:[
+                        {
+                            street: 'Street 1',
+                            number: '123',
+                            neighborhood: 'Neighborhood 1',
+                            city: 'City 1',
+                            state: 'State 1',
+                            zip: '12345-678',
+                            unit: 'Unit 1'
+                        },
+                        {
+                            street: 'Street 2',
+                            number: '456',
+                            neighborhood: 'Neighborhood 2',
+                            city: 'City 2',
+                            state: 'State 2',
+                            zip: '98765-432',
+                            unit: 'Unit 2'
+                        }
+                    ]
+                    ,
+                    notes: 'this is a long note',
+                    active: true,
+                    show_address: true,
+                    show_notes: true
+                };
+
+                brTest.setAttribute('data-state', JSON.stringify(personWith2AddressesJson));
+
+            });
+        });
+    </script>
+</head>
+<body>
+    <br-test data-state='{"name":"bee"}'></br-test>
+    <button onclick="console.log(document.querySelector('br-test').dataset)">Save</button>
+</body>
+</html>

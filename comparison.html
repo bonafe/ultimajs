@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparison with other frameworks — Ultima</title>
+<meta name="description" content="Compare Ultima with Litedom, Alpine.js, Lit, Minze and VanJS. Understand the differences in architecture, templates, Web Components, reactivity, build and dependencies.">
+<link rel="stylesheet" href="./assets/estilo.css">
+<link rel="stylesheet" href="./assets/comparison.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Home</span></a>
+    <a href="./getting-started.html"><span class="rotulo-nav">Docs</span></a>
+    <a href="./examples.html"><span class="rotulo-nav">Examples</span></a>
+    <a href="./benchmarks/index.html"><span class="rotulo-nav">Benchmark</span></a>
+    <a href="./comparison.html" class="ativo"><span class="rotulo-nav">Comparison</span></a>
+    <a href="./about.html"><span class="rotulo-nav">About</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs layout-docs-largo">
+  <article class="conteudo-docs viz-root">
+
+    <h1>How does Ultima compare?</h1>
+    <p class="chapeu">
+      Ultima shares ideas with other reactive frameworks, but combines native Web Components,
+      external HTML templates, a declarative DSL based on data paths, and execution with no build
+      step or runtime dependencies.
+    </p>
+
+    <h2>Introduction</h2>
+    <p>
+      Ultima's general proposition isn't unprecedented: other reactive libraries exist, based on Web
+      Components or running directly in the browser with no required compilation step. The difference
+      is in the combination of architectural decisions: components defined as Custom Elements,
+      templates kept in external HTML files, binding via <code class="linha">data-*</code>
+      attributes, expressions restricted to data paths, and direct DOM updates.
+    </p>
+    <p>
+      This isn't a comparison of popularity, feature count, or community size. The focus is on
+      architecture and development experience.
+    </p>
+
+    <div class="aviso">
+      <strong>In short.</strong> The conceptually closest project to Ultima is Litedom: both offer
+      reactive components based on Web standards, with no Virtual DOM and no required build. Alpine.js
+      is the closest in the look of its declarative DSL. Lit and Minze are the most direct references
+      for building reactive Web Components. VanJS shares the pursuit of a minimal layer over native
+      JavaScript and the DOM.
+      <br><br>
+      Ultima's clearest differentiator is using external <code class="linha">.html</code> templates,
+      tied to the component's JavaScript class, with a restricted DSL based on
+      <code class="linha">data-*</code> attributes and data paths.
+    </div>
+
+    <h2>Projects compared</h2>
+    <p>This page compares Ultima with five projects:</p>
+    <ul>
+      <li><strong>Litedom</strong> — a reactive library for Web Components.</li>
+      <li><strong>Alpine.js</strong> — declarative reactivity added to existing HTML.</li>
+      <li><strong>Lit</strong> — building reactive Web Components.</li>
+      <li><strong>Minze</strong> — simplified Web Component authoring.</li>
+      <li><strong>VanJS</strong> — reactive interfaces built directly in JavaScript and the DOM.</li>
+    </ul>
+    <p>
+      React, Vue, Angular and Svelte have a broader scope, ecosystem and set of goals. They serve as
+      a market reference for UI frameworks, but they aren't Ultima's closest architectural peers —
+      which is why they don't appear in the table below.
+    </p>
+
+    <h2>Comparison table</h2>
+    <p>
+      "Yes" shouldn't be read as automatically better than "No" — every row is an architectural
+      decision with trade-offs, not a scoreboard.
+    </p>
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Criterion</th>
+            <th scope="col">Ultima</th>
+            <th scope="col">Litedom</th>
+            <th scope="col">Alpine.js</th>
+            <th scope="col">Lit</th>
+            <th scope="col">Minze</th>
+            <th scope="col">VanJS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Main focus</th><td>Reactive Web Components and applications built with native APIs</td><td>Reactive library for Web Components</td><td>Declarative reactivity added to existing HTML</td><td>Building reactive Web Components</td><td>Simplified Web Component authoring</td><td>Reactive interfaces built directly in JavaScript and the DOM</td></tr>
+          <tr><th scope="row">Native Custom Elements</th><td>Yes</td><td>Yes</td><td>Not as the primary unit</td><td>Yes</td><td>Yes</td><td>Not as the primary unit</td></tr>
+          <tr><th scope="row">Shadow DOM</th><td>Optional</td><td>Supported</td><td>Not the default model</td><td>Built into components</td><td>Default (used by every component)</td><td>Not the default model</td></tr>
+          <tr><th scope="row">Reactivity</th><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+          <tr><th scope="row">Template format</th><td>External <code class="linha">.html</code> file</td><td>JavaScript template literal</td><td>The page's own HTML with <code class="linha">x-*</code> directives</td><td>Tagged template literal in JavaScript</td><td>String/template returned from a JavaScript method</td><td>JavaScript functions that create DOM nodes</td></tr>
+          <tr><th scope="row">Declarative DSL in HTML</th><td><code class="linha">data-*</code> attributes</td><td><code class="linha">:for</code>/<code class="linha">:if</code>/<code class="linha">@bind</code> directives in the template</td><td><code class="linha">x-*</code> directives</td><td>Bindings and directives in <code class="linha">html</code> templates</td><td><code class="linha">on:event</code> attribute and string interpolation</td><td>None; composed through JavaScript functions</td></tr>
+          <tr><th scope="row">Template expressions</th><td>Deliberately restricted data paths</td><td>JavaScript expressions in a template literal</td><td>JavaScript expressions</td><td>JavaScript expressions</td><td>JavaScript expressions (interpolated string)</td><td>Plain JavaScript</td></tr>
+          <tr><th scope="row">Two-way binding</th><td>Yes, via <code class="linha">data-bind</code> and the native <code class="linha">change</code> event</td><td>Yes, via <code class="linha">@bind</code></td><td>Yes, via <code class="linha">x-model</code></td><td>Not as a built-in directive — property binding + manual listener</td><td>Not documented as a core feature</td><td>Yes, called "State Binding" in its own documentation</td></tr>
+          <tr><th scope="row">Conditionals</th><td><code class="linha">&lt;template data-if&gt;</code>, <code class="linha">data-else-if</code> and <code class="linha">data-else</code></td><td><code class="linha">:if</code>/<code class="linha">:else</code> directives</td><td><code class="linha">x-if</code> (on <code class="linha">&lt;template&gt;</code>) and <code class="linha">x-show</code></td><td>Ternary expression in <code class="linha">render()</code>, plus the <code class="linha">cache()</code> directive</td><td>Ternary expression in the <code class="linha">html</code> method</td><td>Function returning a node or <code class="linha">null</code></td></tr>
+          <tr><th scope="row">Lists</th><td><code class="linha">&lt;template data-for&gt;</code></td><td><code class="linha">:for</code> directive</td><td><code class="linha">x-for</code></td><td><code class="linha">repeat()</code> or <code class="linha">map()</code> directive</td><td><code class="linha">.map().join('')</code> in the template</td><td>Incremental manipulation of real nodes</td></tr>
+          <tr><th scope="row">Keyed reconciliation</th><td>Yes, via <code class="linha">: field</code> in <code class="linha">data-for</code></td><td>Yes, documented (<code class="linha">:key</code>)</td><td>Yes, via <code class="linha">:key</code> in <code class="linha">x-for</code></td><td>Yes, via <code class="linha">repeat()</code> when used (not with <code class="linha">map()</code>)</td><td>Not documented as a core feature</td><td>The concept doesn't exist — the returned DOM nodes are already the real elements</td></tr>
+          <tr><th scope="row">Virtual DOM</th><td>No</td><td>No</td><td>Not based on a Virtual DOM</td><td>No</td><td>No</td><td>No</td></tr>
+          <tr><th scope="row">Required build step</th><td>No</td><td>No</td><td>No</td><td>Not strictly; tooling is common in the ecosystem</td><td>Not strictly, though the official workflow often uses Node/Vite</td><td>No</td></tr>
+          <tr><th scope="row">Required <code class="linha">npm install</code></th><td>No</td><td>No</td><td>No</td><td>Not strictly, but it's the most common install path</td><td>Not strictly; npm/CDN are both supported</td><td>No</td></tr>
+          <tr><th scope="row">Runtime dependency</th><td>No third-party library in the core</td><td>The Litedom library itself</td><td>The Alpine library itself</td><td>The Lit library</td><td>The Minze library</td><td>The VanJS library</td></tr>
+          <tr><th scope="row">Extra runtime size</th><td>Project-local core; not disclosing a number without a reproducible measurement</td><td>About 3–3.5 kB gzipped, per official docs</td><td>Measure or omit; not estimated here</td><td>About 5 kB minified and compressed, per official docs</td><td>About 3 kB minified and compressed, per official docs</td><td>About 1 kB, per official docs</td></tr>
+          <tr><th scope="row">External HTML per component</th><td>Yes, a core decision</td><td>No</td><td>The HTML is already on the page</td><td>Not the default</td><td>Not the default</td><td>No</td></tr>
+          <tr><th scope="row">Template path relative to module</th><td>Yes, via <code class="linha">import.meta.url</code></td><td>Not applicable</td><td>Not applicable</td><td>Not applicable</td><td>Not applicable</td><td>Not applicable</td></tr>
+          <tr><th scope="row">Composes with plain HTML</th><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+          <tr><th scope="row">Latest version researched</th><td>—</td><td>0.12.1 (Feb 2020)<span class="badge-abandonado">no commits since 2020</span></td><td>3.15.12</td><td>3.3.3</td><td>1.10.2</td><td>1.6.1</td></tr>
+          <tr><th scope="row">Community/ecosystem</th><td>Personal project, no formal community</td><td>Small project, apparently not actively maintained</td><td>Well-established community</td><td>Established Web Components ecosystem</td><td>Specialized, active project</td><td>Small, active project</td></tr>
+          <tr><th scope="row">License</th><td>CC0 1.0</td><td>MIT</td><td>MIT</td><td>BSD-3-Clause</td><td>MIT</td><td>MIT</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.85rem">
+      Versions and dates checked against official documentation/CDNs on 2026-07-24; they may change
+      after this was published. Runtime sizes were not independently verified in this research
+      (except VanJS) — values per each project's official documentation, subject to change.
+    </p>
+
+    <h2 id="codigo-lado-a-lado">How it's done in practice</h2>
+    <p>
+      The same five scenarios, implemented in each framework — real code, adapted from the
+      implementations used in this page's <a href="./benchmarks/index.html">benchmark</a> (tested in
+      the browser, not pseudocode). Ultima stays fixed on the left; pick a scenario and a framework on
+      the right to compare.
+    </p>
+
+    <div class="seletor-exemplo" id="seletor-exemplo" role="tablist" aria-label="Code example">
+      <button class="aba-exemplo" data-exemplo="counter">Reactive counter</button>
+      <button class="aba-exemplo" data-exemplo="list">Keyed list</button>
+      <button class="aba-exemplo" data-exemplo="conditional">Conditional</button>
+      <button class="aba-exemplo" data-exemplo="binding">Two-way binding</button>
+      <button class="aba-exemplo" data-exemplo="template">Separate HTML template</button>
+    </div>
+
+    <div class="painel-comparacao-codigo">
+      <div class="lado-ultima">
+        <div class="rotulo-lado">Ultima</div>
+        <div class="bloco-codigo">
+          <div class="barra">
+            <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+            <span class="titulo-arquivo" id="arquivo-ultima"></span>
+          </div>
+          <pre><code id="conteudo-ultima"></code></pre>
+        </div>
+      </div>
+      <div class="lado-outros">
+        <div class="rotulo-lado">Other framework</div>
+        <div class="seletor-framework" id="seletor-framework" role="tablist" aria-label="Choose a framework">
+          <button class="aba-framework" data-framework="litedom">Litedom</button>
+          <button class="aba-framework" data-framework="alpine">Alpine.js</button>
+          <button class="aba-framework" data-framework="lit">Lit</button>
+          <button class="aba-framework" data-framework="minze">Minze</button>
+          <button class="aba-framework" data-framework="vanjs">VanJS</button>
+        </div>
+        <p class="nota-framework" id="nota-framework" hidden></p>
+        <div class="bloco-codigo">
+          <div class="barra">
+            <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+            <span class="titulo-arquivo" id="arquivo-framework"></span>
+          </div>
+          <pre><code id="conteudo-framework"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <h2>Detailed comparisons</h2>
+
+    <h3>Ultima × Litedom</h3>
+    <p>
+      Litedom is probably the conceptually closest project to Ultima. Both use Web Components
+      standards, offer reactivity and data binding, and skip the Virtual DOM, JSX, and a required
+      build step.
+    </p>
+    <p>
+      The main difference is in how components are organized. Litedom keeps the template in
+      JavaScript, using template literals and language expressions. Ultima splits the template into
+      an external <code class="linha">.html</code> file and restricts the DSL mostly to data paths
+      declared in <code class="linha">data-*</code> attributes.
+    </p>
+    <p>
+      That restriction makes Ultima's template less expressive than arbitrary JavaScript, but also
+      more predictable: logic tends to stay in the component class, while the HTML describes
+      bindings, conditionals and lists. It's also worth noting that Litedom's repository hasn't
+      received commits since 2020 — the features described here still work via CDN, but the project
+      doesn't appear to be actively maintained.
+    </p>
+    <div class="grade-escolha">
+      <div class="pilar pilar-compacto">
+        <h4>Choose Litedom when</h4>
+        <ul>
+          <li>you want a small, already-structured library for Web Components;</li>
+          <li>you prefer templates written alongside the JavaScript;</li>
+          <li>you need JavaScript expressions directly in the template;</li>
+          <li>you're fine with a project that has no recent commits.</li>
+        </ul>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Choose Ultima when</h4>
+        <ul>
+          <li>you want to keep the template in a separate HTML file;</li>
+          <li>you prefer a deliberately restricted DSL;</li>
+          <li>you want the component's URLs resolved relative to its own module;</li>
+          <li>you're studying or building an architecture centered on native browser APIs.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Ultima × Alpine.js</h3>
+    <p>
+      Alpine.js is the project closest to Ultima in how its HTML looks. Both use declarative
+      attributes to connect data and elements, build conditionals, repeat lists, and handle forms.
+    </p>
+    <p>
+      The difference is in the architectural unit. Alpine turns pieces of existing HTML into reactive
+      regions via <code class="linha">x-data</code> and other directives. Ultima defines each unit as
+      a real Custom Element, optionally encapsulated in Shadow DOM, with its own class and lifecycle.
+    </p>
+    <p>
+      Alpine allows JavaScript expressions directly in its directives. Ultima mostly uses data paths,
+      reducing the expressive power available in the template and encouraging logic to stay in the
+      component's JavaScript.
+    </p>
+    <div class="grade-escolha">
+      <div class="pilar pilar-compacto">
+        <h4>Choose Alpine.js when</h4>
+        <ul>
+          <li>you want to add progressive interactivity to server-rendered pages;</li>
+          <li>you don't need every region to be a Web Component;</li>
+          <li>you want to write JavaScript expressions directly in attributes;</li>
+          <li>you want a more established ecosystem and more community documentation.</li>
+        </ul>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Choose Ultima when</h4>
+        <ul>
+          <li>native component identity matters;</li>
+          <li>you need Shadow DOM per component;</li>
+          <li>you prefer an external HTML template;</li>
+          <li>you want a DSL with less freedom to run arbitrary code inside the HTML.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Ultima × Lit</h3>
+    <p>
+      Lit is the leading contemporary reference for building reactive Web Components. Its components
+      are real Custom Elements, interoperable with HTML and other frameworks. The library provides
+      reactive properties, encapsulated styles, and efficient declarative templates.
+    </p>
+    <p>
+      Lit writes templates in JavaScript via tagged template literals. Ultima keeps the HTML in a
+      separate file and describes bindings in <code class="linha">data-*</code> attributes.
+    </p>
+    <p>
+      Lit has greater maturity, ecosystem, documentation, TypeScript integration and development
+      tooling. Ultima offers a more experimental, minimalist experience, aimed at those who want to
+      work directly with their own architecture and less external infrastructure.
+    </p>
+    <div class="grade-escolha">
+      <div class="pilar pilar-compacto">
+        <h4>Choose Lit when</h4>
+        <ul>
+          <li>you need a mature solution for reusable components;</li>
+          <li>you want solid TypeScript integration;</li>
+          <li>you need a broad ecosystem, tooling and documentation;</li>
+          <li>you're building a design system or a distributed library.</li>
+        </ul>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Choose Ultima when</h4>
+        <ul>
+          <li>external HTML templates are a requirement;</li>
+          <li>you want to study or control the reactive mechanism itself;</li>
+          <li>you want a small core copied directly into the project;</li>
+          <li>you're fine with the project still having experimental parts.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Ultima × Minze</h3>
+    <p>
+      Minze simplifies building Web Components and offers a base class, reactivity, lifecycle, and
+      tooling to produce reusable components. Like Ultima, it tries to reduce the boilerplate of the
+      native APIs.
+    </p>
+    <p>
+      Minze's workflow is closer to a ready-made library for building and distributing components,
+      including integration with npm, TypeScript, Vite and Storybook. Ultima is more independent of
+      that ecosystem and organizes a component through an external HTML file and a JavaScript class.
+    </p>
+    <div class="grade-escolha">
+      <div class="pilar pilar-compacto">
+        <h4>Choose Minze when</h4>
+        <ul>
+          <li>you want to produce publishable component libraries;</li>
+          <li>you need TypeScript and Storybook;</li>
+          <li>you prefer a specialized tool with an established project workflow.</li>
+        </ul>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Choose Ultima when</h4>
+        <ul>
+          <li>you want to skip the usual packaging workflow;</li>
+          <li>you'd rather copy and version the core directly;</li>
+          <li>the goal is your own application or architectural experiment, not a public component library.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Ultima × VanJS</h3>
+    <p>
+      VanJS and Ultima share an interest in a small layer, with no application transpilation and no
+      Virtual DOM. Both proposals try to stay close to the browser.
+    </p>
+    <p>
+      The difference is the direction taken. VanJS builds the interface through JavaScript functions
+      that create and connect DOM nodes. Ultima keeps HTML as the template's primary language and uses
+      declarative attributes to tie it to state.
+    </p>
+    <div class="grade-escolha">
+      <div class="pilar pilar-compacto">
+        <h4>Choose VanJS when</h4>
+        <ul>
+          <li>you prefer building the DOM tree in JavaScript;</li>
+          <li>you want an extremely small library;</li>
+          <li>the unit of composition doesn't need to be a Custom Element.</li>
+        </ul>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Choose Ultima when</h4>
+        <ul>
+          <li>you want the template to stay as HTML;</li>
+          <li>you want Custom Elements as the architectural unit;</li>
+          <li>you prefer declarative binding via attributes and data paths.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>What sets Ultima apart</h2>
+
+    <h3>External HTML templates</h3>
+    <p>
+      Every component can keep its structure in an <code class="linha">.html</code> file, separate
+      from the JavaScript class. The template's path is resolved relative to the component's own
+      module with <code class="linha">import.meta.url</code>, not relative to the page that uses it.
+    </p>
+    <div class="bloco-codigo">
+      <div class="barra"><span class="ponto"></span><span class="ponto"></span><span class="ponto"></span><span class="titulo-arquivo">my-counter.js</span></div>
+      <pre><code>super(
+    { templateUrl: './my-counter.html', shadowDom: true },
+    import.meta.url
+);</code></pre>
+    </div>
+
+    <h3>DSL based on <code class="linha">data-*</code> attributes</h3>
+    <p>The DSL mostly works with data paths, not with unrestricted JavaScript execution in the template:</p>
+    <ul>
+      <li><code class="linha">data-bind</code></li>
+      <li><code class="linha">data-class</code></li>
+      <li><code class="linha">data-style</code></li>
+      <li><code class="linha">data-ref</code></li>
+      <li><code class="linha">data-if</code>, <code class="linha">data-else-if</code>, <code class="linha">data-else</code></li>
+      <li><code class="linha">data-for</code></li>
+    </ul>
+
+    <h3>Two-way binding between data and the DOM</h3>
+    <p>
+      <code class="linha">data-bind</code> updates properties and attributes from state. On editable
+      elements, the native <code class="linha">change</code> event writes the value back to the
+      corresponding path.
+    </p>
+    <div class="bloco-codigo">
+      <div class="barra"><span class="ponto"></span><span class="ponto"></span><span class="ponto"></span><span class="titulo-arquivo">example.html</span></div>
+      <pre><code>&lt;input data-bind='{"value":"name"}'&gt;
+&lt;input type="checkbox" data-bind='{"checked":"active"}'&gt;
+&lt;span data-bind='{"textContent":"name"}'&gt;&lt;/span&gt;</code></pre>
+    </div>
+
+    <h3>Composing components</h3>
+    <p>Passing objects through the <code class="linha">data-state</code> attribute involves JSON serialization and has some limitations.</p>
+    <div class="bloco-codigo">
+      <div class="barra"><span class="ponto"></span><span class="ponto"></span><span class="ponto"></span><span class="titulo-arquivo">example.html</span></div>
+      <pre><code>&lt;child-component
+    data-bind='{"data-state":"profile"}'&gt;
+&lt;/child-component&gt;</code></pre>
+    </div>
+
+    <h3>Direct DOM reconciliation</h3>
+    <p>
+      In lists with a valid key, DOM nodes matching the same item are reused and repositioned,
+      preserving identity, focus and internal state when possible. There's no parallel Virtual DOM
+      tree kept in sync.
+    </p>
+
+    <h3>Conditionals that preserve the active branch</h3>
+    <p>
+      When a conditional chain's winning branch stays the same, Ultima doesn't need to destroy and
+      recreate that branch's whole content. This helps preserve the identity of the elements inside it.
+    </p>
+
+    <h2>Current trade-offs</h2>
+
+    <h3>Ecosystem</h3>
+    <p>Ultima has no formal community, official npm package, plugin collection, broad IDE integration, or an established job market.</p>
+
+    <h3>Maturity</h3>
+    <p>The project has parts that are well tested and others that are still experimental or incomplete. The source code is still the primary source of truth.</p>
+
+    <h3>Tooling</h3>
+    <p>There's currently no experience equivalent to what mature TypeScript tooling, specialized linting, devtools, SSR, hydration, or static generation offer.</p>
+
+    <h3>State serialized into an attribute</h3>
+    <p>The <code class="linha">data-state</code> contract makes declarative communication easy, but it uses JSON serialization. That doesn't naturally represent values like functions, circular references, <code class="linha">Map</code>, <code class="linha">Set</code>, a <code class="linha">Date</code> with its semantics preserved, or <code class="linha">undefined</code>.</p>
+
+    <h3>Large updates</h3>
+    <p>Large or high-frequency state updates can make attribute-based serialization and syncing less suitable — see the real numbers in this comparison's <a href="./benchmarks/index.html">benchmark</a>.</p>
+
+    <h3>DSL expressiveness</h3>
+    <p>Restricted paths keep the template predictable, but require moving transformations and logic into computed properties or JavaScript methods.</p>
+
+    <h3>Templates loaded at runtime</h3>
+    <p>External HTML files preserve separation of concerns, but introduce runtime resource loading and handling. The project must be served over HTTP; opening it directly via <code class="linha">file://</code> may not work due to browser policies.</p>
+
+    <h2>Which one should you choose?</h2>
+    <div class="grade-pilares">
+      <div class="pilar">
+        <h3>Use Ultima when</h3>
+        <p>Custom Elements and native APIs are the direct goal, external HTML per component is desirable, a small and restricted DSL is preferable, and the project can accept a personal, experimental piece of technology.</p>
+      </div>
+      <div class="pilar">
+        <h3>Use Litedom when</h3>
+        <p>You want a small, conceptually very close alternative, with JavaScript templates and similar reactive features ready to go.</p>
+      </div>
+      <div class="pilar">
+        <h3>Use Alpine.js when</h3>
+        <p>You need to add progressive interactivity to existing HTML, working with server-rendered pages.</p>
+      </div>
+      <div class="pilar">
+        <h3>Use Lit when</h3>
+        <p>You need a mature, widely adopted base for Web Components, with TypeScript, tooling and tested documentation.</p>
+      </div>
+      <div class="pilar">
+        <h3>Use Minze when</h3>
+        <p>You want a simplified experience for developing and distributing Web Components, with npm, Vite and Storybook integration.</p>
+      </div>
+      <div class="pilar">
+        <h3>Use VanJS when</h3>
+        <p>You prefer building interfaces directly in JavaScript, with a minimal abstraction and no requirement for Custom Elements as the central model.</p>
+      </div>
+    </div>
+
+    <h2>Is Ultima a new idea?</h2>
+    <p>
+      Not in the sense of starting a new category. Before and after Ultima began, other projects had
+      already combined reactivity, Web Components, the absence of a Virtual DOM, and execution with
+      no required build step.
+    </p>
+    <p>
+      Ultima's own proposition is in the combination: external HTML templates, real Custom Elements,
+      optional Shadow DOM, a DSL in <code class="linha">data-*</code> attributes, expressions based
+      mostly on data paths, composition through the <code class="linha">data-state</code> contract,
+      and direct DOM reconciliation.
+    </p>
+    <div class="citacao-destaque">
+      An independent implementation, with its own <strong>architectural combination</strong> of existing ideas.
+    </div>
+
+    <h2>Recommended definition</h2>
+    <div class="citacao-destaque">
+      <strong>Ultima is an HTML-first microframework for reactive Web Components</strong>, with no
+      required build step and no third-party dependencies in its core, with external HTML templates
+      and a declarative DSL based on data paths.
+    </div>
+    <p>
+      We avoid "zero runtime" in an ambiguous sense, since Ultima's own core does execute at runtime.
+      The accurate way to put it: no third-party dependencies in the core; no external library loaded
+      at runtime; no required build step.
+    </p>
+
+    <h2>Sources and methodology</h2>
+    <p>
+      This comparison considers each project's official documentation available as of 2026-07-24.
+      Features, licenses, sizes and installation methods may change. When a feature isn't clearly
+      documented, it's presented as "not documented," not as fact.
+    </p>
+    <ul>
+      <li>Ultima — <a href="./index.html">site</a>, <a href="./getting-started.html">getting started</a>, <a href="./guide.html">guide</a>, <a href="./reference.html">DSL reference</a>, <a href="./about.html">about</a>, <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener noreferrer">repository</a>.</li>
+      <li>Litedom — <a href="https://litedom.js.org/" target="_blank" rel="noopener noreferrer">site</a>, <a href="https://litedom.js.org/guide/" target="_blank" rel="noopener noreferrer">guide</a>.</li>
+      <li>Alpine.js — <a href="https://alpinejs.dev/" target="_blank" rel="noopener noreferrer">site and documentation</a>, <a href="https://alpinejs.dev/directives/data" target="_blank" rel="noopener noreferrer">x-data</a>, <a href="https://alpinejs.dev/directives/model" target="_blank" rel="noopener noreferrer">x-model</a>, <a href="https://alpinejs.dev/directives/if" target="_blank" rel="noopener noreferrer">x-if</a>, <a href="https://alpinejs.dev/directives/for" target="_blank" rel="noopener noreferrer">x-for</a>.</li>
+      <li>Lit — <a href="https://lit.dev/" target="_blank" rel="noopener noreferrer">site and documentation</a>, <a href="https://lit.dev/docs/templates/lists/" target="_blank" rel="noopener noreferrer">lists</a>, <a href="https://lit.dev/docs/components/properties/" target="_blank" rel="noopener noreferrer">reactive properties</a>.</li>
+      <li>Minze — <a href="https://minze.dev/" target="_blank" rel="noopener noreferrer">site</a>, <a href="https://minze.dev/guide/introduction" target="_blank" rel="noopener noreferrer">introduction</a>, <a href="https://minze.dev/guide/advanced/performance" target="_blank" rel="noopener noreferrer">performance</a>.</li>
+      <li>VanJS — <a href="https://vanjs.org/" target="_blank" rel="noopener noreferrer">site</a>, <a href="https://vanjs.org/start" target="_blank" rel="noopener noreferrer">getting started</a>, <a href="https://vanjs.org/tutorial" target="_blank" rel="noopener noreferrer">tutorial</a>.</li>
+      <li>Performance numbers — a <a href="./benchmarks/index.html">reproducible benchmark</a> run in the browser, source code in <code class="linha">benchmarks/</code> in the repository.</li>
+    </ul>
+
+  </article>
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./about.html">About</a>
+    <a href="./getting-started.html">Docs</a>
+  </div>
+  <div>CC0 license (public domain) · Personal project, maintained since 2020</div>
+</footer>
+
+<script type="module" src="./comparison.js"></script>
+
+</body>
+</html>

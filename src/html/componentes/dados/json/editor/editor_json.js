@@ -1,18 +1,18 @@
-import { ComponenteBase } from '../../../componente_base.js';
+import { ComponentBase } from '../../../component_base.js';
 import { Evento } from '../../../espaco/evento.js';
 
 
-export class EditorJSON extends ComponenteBase {
+export class EditorJSON extends ComponentBase {
 
     constructor(){
-        super({templateURL:"./editor_json.html", shadowDOM:false}, import.meta.url);
+        super({templateUrl:"./editor_json.html", shadowDom:false}, import.meta.url);
 
         this._dados = undefined;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
 
             //Importa dinamicamente a biblioteca JSONEditor
-            import(ComponenteBase.resolverEndereco('../../../../bibliotecas/jsoneditor/jsoneditor.js', import.meta.url))
+            import(ComponentBase.resolverEndereco('../../../../bibliotecas/jsoneditor/jsoneditor.js', import.meta.url))
                 .then(modulo => {
                     this.modulo = modulo;
                     this.criarEditor();                               
@@ -44,19 +44,19 @@ export class EditorJSON extends ComponenteBase {
 
     
         if (nomeAtributo.localeCompare("dados") == 0){
-            this.dados = JSON.parse(novoValor);
+            this.state = JSON.parse(novoValor);
 
             //Se possui o atributo "src" e é um arquivo json
             let efetuouDownload = false;
-            if (this.dados.src){ 
-                this.src = this.dados.src;
+            if (this.state.src){ 
+                this.src = this.state.src;
                 if (this.src.toLowerCase().endsWith("json")){                    
 
                     //Carrega o arquivo json da url em "src"
                     fetch(this.src)
                         .then(retorno => retorno.json())
                         .then(json => {
-                            this.dados = json;
+                            this.state = json;
                             this.atualizarDadosEditor();
                         })
                         .catch (e => alert (e));
@@ -77,7 +77,7 @@ export class EditorJSON extends ComponenteBase {
     dispararEventoSelecaoObjeto(no){        
 
         if (no.path.length > 0){
-            let dados = EditorJSON.trazerDado(no.path, this.dados);
+            let dados = EditorJSON.trazerDado(no.path, this.state);
 
             if (typeof dados === 'object'){
                 
@@ -108,14 +108,14 @@ export class EditorJSON extends ComponenteBase {
 
         if (!this.editor){
 
-            let container = super.no_raiz.querySelector("#editorJSON");
+            let container = super.rootNode.querySelector("#editorJSON");
             let opcoes = {
                 target: container,
                 props:{
                     mode: 'tree',
                     onChange: (updatedContent, previousContent, patchResult) => {                        
-                        this.dados = updatedContent.json;
-                        this.dispatchEvent(new CustomEvent("change", {detail:this.dados}));                      
+                        this.state = updatedContent.json;
+                        this.dispatchEvent(new CustomEvent("change", {detail:this.state}));                      
                     }            
                 }
             };
@@ -128,8 +128,8 @@ export class EditorJSON extends ComponenteBase {
 
 
     atualizarDadosEditor(){
-        if (this.editor && this.dados){
-            this.editor.set({json:this.dados});
+        if (this.editor && this.state){
+            this.editor.set({json:this.state});
             setTimeout(()=>this.editor.expand(caminho => caminho.length < 2));                        
         }
     }

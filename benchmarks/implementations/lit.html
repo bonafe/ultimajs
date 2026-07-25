@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lit — benchmark implementation</title>
+</head>
+<body>
+
+<bench-counter id="counter"></bench-counter>
+<bench-list id="list"></bench-list>
+<bench-conditional id="conditional"></bench-conditional>
+<bench-binding id="binding"></bench-binding>
+
+<script type="module">
+  import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@3/+esm';
+  import { repeat } from 'https://cdn.jsdelivr.net/npm/lit@3/directives/repeat.js/+esm';
+
+  class BenchCounter extends LitElement {
+    static properties = { count: {} };
+    constructor() { super(); this.count = 0; }
+    createRenderRoot() { return this; }
+    render() { return html`<span class="value">${this.count}</span>`; }
+    reset() { this.count = 0; }
+    incrementTimes(n) { for (let i = 0; i < n; i++) { this.count = this.count + 1; } }
+    currentValue() { return this.count; }
+  }
+  customElements.define('bench-counter', BenchCounter);
+
+  class BenchConditional extends LitElement {
+    static properties = { open: {} };
+    constructor() { super(); this.open = false; }
+    createRenderRoot() { return this; }
+    render() {
+      return this.open
+        ? html`<div class="visible-block">visible</div>`
+        : html`<div class="hidden-block">hidden</div>`;
+    }
+    reset() { this.open = false; }
+    toggleTimes(n) { for (let i = 0; i < n; i++) { this.open = !this.open; } }
+    currentState() { return this.open; }
+  }
+  customElements.define('bench-conditional', BenchConditional);
+
+  class BenchBinding extends LitElement {
+    static properties = { text: {} };
+    constructor() { super(); this.text = ''; }
+    createRenderRoot() { return this; }
+    render() {
+      return html`
+        <input class="field" type="text" .value=${this.text} @input=${(e) => { this.text = e.target.value; }}>
+        <span class="echo">${this.text}</span>
+      `;
+    }
+    reset() { this.text = ''; }
+    writeTimes(n) {
+      const field = this.querySelector('.field');
+      for (let i = 0; i < n; i++) {
+        field.value = `value-${i}`;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+    currentValue() { return this.text; }
+  }
+  customElements.define('bench-binding', BenchBinding);
+
+  const ADJECTIVES = ['fast', 'slow', 'big', 'small', 'blue', 'green', 'red', 'light', 'dark', 'new'];
+  const NOUNS = ['car', 'table', 'cloud', 'river', 'hill', 'wind', 'field', 'port', 'valley', 'lake'];
+  function randomLabel() {
+    const a = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+    const n = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+    return `${a} ${n}`;
+  }
+  let nextId = 1;
+
+  class BenchList extends LitElement {
+    static properties = { rows: {} };
+    constructor() { super(); this.rows = []; }
+    createRenderRoot() { return this; }
+    render() {
+      return html`
+        <table><tbody>
+          ${repeat(this.rows, (row) => row.id, (row) => html`
+            <tr>
+              <td class="id-column">${row.id}</td>
+              <td class="label-column">${row.label}</td>
+            </tr>
+          `)}
+        </tbody></table>
+      `;
+    }
+    create(n) {
+      const rows = [];
+      for (let i = 0; i < n; i++) {
+        rows.push({ id: nextId++, label: randomLabel() });
+      }
+      this.rows = rows;
+    }
+    updatePartial() {
+      this.rows = this.rows.map((row, index) =>
+        index % 10 === 0 ? { ...row, label: row.label + ' !!!' } : row
+      );
+    }
+    swap() {
+      const rows = this.rows.slice();
+      if (rows.length > 998) {
+        [rows[1], rows[998]] = [rows[998], rows[1]];
+      } else if (rows.length > 1) {
+        [rows[0], rows[rows.length - 1]] = [rows[rows.length - 1], rows[0]];
+      }
+      this.rows = rows;
+    }
+    remove() {
+      if (this.rows.length === 0) { return; }
+      this.rows = this.rows.slice(1);
+    }
+    clear() { this.rows = []; }
+    countRows() { return this.rows.length; }
+  }
+  customElements.define('bench-list', BenchList);
+
+  const elCounter = document.getElementById('counter');
+  const elList = document.getElementById('list');
+  const elConditional = document.getElementById('conditional');
+  const elBinding = document.getElementById('binding');
+
+  window.bench = {
+    ready: Promise.all([
+      elCounter.updateComplete,
+      elList.updateComplete,
+      elConditional.updateComplete,
+      elBinding.updateComplete
+    ]).then(() => {}),
+    counter: {
+      reset: () => elCounter.reset(),
+      increment: (n) => elCounter.incrementTimes(n),
+      currentValue: () => elCounter.currentValue()
+    },
+    list: {
+      create: (n) => elList.create(n),
+      updatePartial: () => elList.updatePartial(),
+      swap: () => elList.swap(),
+      remove: () => elList.remove(),
+      clear: () => elList.clear(),
+      countRows: () => elList.countRows()
+    },
+    conditional: {
+      reset: () => elConditional.reset(),
+      toggle: (n) => elConditional.toggleTimes(n),
+      currentState: () => elConditional.currentState()
+    },
+    binding: {
+      reset: () => elBinding.reset(),
+      write: (n) => elBinding.writeTimes(n),
+      currentValue: () => elBinding.currentValue()
+    }
+  };
+</script>
+
+</body>
+</html>

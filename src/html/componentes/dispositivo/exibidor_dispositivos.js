@@ -1,20 +1,20 @@
-import { ComponenteBase } from '../componente_base.js';
+import { ComponentBase } from '../component_base.js';
 import { Evento } from '../espaco/evento.js';
 import { ExibidorDispositivo } from './exibidor_dispositivo.js';
 
 
-export class ExibidorDispositivos extends ComponenteBase {
+export class ExibidorDispositivos extends ComponentBase {
 
 
 
     constructor(){
-        super({templateURL:"./exibidor_dispositivos.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./exibidor_dispositivos.html", shadowDom:true}, import.meta.url);
 
         this.video = undefined;        
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {            
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {            
 
-            this.renderizar();
+            this.render();
         });
     }
 
@@ -31,7 +31,7 @@ export class ExibidorDispositivos extends ComponenteBase {
     
         if (nomeAtributo.localeCompare("dados") == 0){
 
-            this.dados = JSON.parse(novoValor);
+            this.state = JSON.parse(novoValor);
         }
     }
 
@@ -40,9 +40,9 @@ export class ExibidorDispositivos extends ComponenteBase {
     
 
 
-    renderizar(){
+    render(){
         
-        if (super.carregado && !this.renderizado){
+        if (super.loaded && !this.renderizado){
             
             this.preencherDispositivos().then(()=>{
                 
@@ -59,12 +59,12 @@ export class ExibidorDispositivos extends ComponenteBase {
 
                 this.atualizarDispositivos(dispositivosMediaAPI);
 
-                let listaDispositivos = super.no_raiz.querySelector("#dispositivos");   
+                let listaDispositivos = super.rootNode.querySelector("#dispositivos");   
 
                 //TODO: não apagar tudo, atualizar com o que mudou
                 listaDispositivos.innerHTML = "";
 
-                Object.entries(this.dados).forEach (entrada => {
+                Object.entries(this.state).forEach (entrada => {
 
                     const [chave, dispositivo] = entrada;
 
@@ -78,8 +78,8 @@ export class ExibidorDispositivos extends ComponenteBase {
 
                     exibidorDispositivo.addEventListener("change", evento => {
                         evento.stopPropagation();
-                        this.dados[exibidorDispositivo.dados.idDispositivo] = exibidorDispositivo.dados;
-                        this.dispatchEvent(new CustomEvent("change", {detail:this.dados}));
+                        this.state[exibidorDispositivo.state.idDispositivo] = exibidorDispositivo.state;
+                        this.dispatchEvent(new CustomEvent("change", {detail:this.state}));
                     });
 
                 });
@@ -97,18 +97,18 @@ export class ExibidorDispositivos extends ComponenteBase {
         
         //TODO: Não dá para saber que é o mesmo dispositivo entre sessões do navegador :(
         //Define todos os dispositivos conhecidos como indisponíveis
-        //Object.entries(this.dados).forEach (dispositivo => {
+        //Object.entries(this.state).forEach (dispositivo => {
         //    dispositivo.disponivel = false;
         //});
         //Zera os dados todas as vezes
-        this.dados = {};
+        this.state = {};
 
 
         dispositivosMediaAPI.forEach( dispositivoMediaAPI => {                                        
 
             let idDispositivo = `${dispositivoMediaAPI.kind}-${dispositivoMediaAPI.groupId}-${dispositivoMediaAPI.deviceId}`;
 
-            let dispositivoAtual = this.dados[idDispositivo];
+            let dispositivoAtual = this.state[idDispositivo];
 
             //TODO: Não vai existir pois não está conseguindo saber que é o mesmo dispositivo
             //Caso o dispositivo já exista no dicionário
@@ -132,7 +132,7 @@ export class ExibidorDispositivos extends ComponenteBase {
                 };
 
                 //Adiciona o novo dispositivo encontrado ao dicionário de dispositivos
-                this.dados[dadosDispositivo.idDispositivo] = dadosDispositivo;
+                this.state[dadosDispositivo.idDispositivo] = dadosDispositivo;
             }
         });            
     }
@@ -147,8 +147,8 @@ export class ExibidorDispositivos extends ComponenteBase {
 
     salvarEstado(){
         console.log(`Salvando câmera: ${this.cameras.value}`);
-        this.dados = {deviceId: this.cameras.value};
-        this.dispatchEvent(new CustomEvent("change", {detail:this.dados}));
+        this.state = {deviceId: this.cameras.value};
+        this.dispatchEvent(new CustomEvent("change", {detail:this.state}));
     }
 }
 customElements.define('exibidor-dispositivos', ExibidorDispositivos);

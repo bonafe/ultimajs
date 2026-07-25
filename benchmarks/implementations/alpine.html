@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpine.js — benchmark implementation</title>
+</head>
+<body>
+
+<div id="counter" x-data="{ count: 0 }">
+  <span class="value" x-text="count"></span>
+</div>
+
+<div id="list" x-data="{ rows: [] }">
+  <table><tbody>
+    <template x-for="row in rows" :key="row.id">
+      <tr>
+        <td class="id-column" x-text="row.id"></td>
+        <td class="label-column" x-text="row.label"></td>
+      </tr>
+    </template>
+  </tbody></table>
+</div>
+
+<div id="conditional" x-data="{ open: false }">
+  <template x-if="open"><div class="visible-block">visible</div></template>
+  <template x-if="!open"><div class="hidden-block">hidden</div></template>
+</div>
+
+<div id="binding" x-data="{ text: '' }">
+  <input class="field" type="text" x-model="text">
+  <span class="echo" x-text="text"></span>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+  const ADJECTIVES = ['fast', 'slow', 'big', 'small', 'blue', 'green', 'red', 'light', 'dark', 'new'];
+  const NOUNS = ['car', 'table', 'cloud', 'river', 'hill', 'wind', 'field', 'port', 'valley', 'lake'];
+  function randomLabel() {
+    const a = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+    const n = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+    return `${a} ${n}`;
+  }
+  let nextId = 1;
+  let counterData, listData, conditionalData, bindingData, bindingField;
+
+  const ready = new Promise(resolve => {
+    document.addEventListener('alpine:initialized', () => {
+      counterData = window.Alpine.$data(document.getElementById('counter'));
+      listData = window.Alpine.$data(document.getElementById('list'));
+      conditionalData = window.Alpine.$data(document.getElementById('conditional'));
+      bindingData = window.Alpine.$data(document.getElementById('binding'));
+      bindingField = document.querySelector('#binding .field');
+      resolve();
+    });
+  });
+
+  window.bench = {
+      ready,
+      counter: {
+        reset: () => { counterData.count = 0; },
+        increment: (n) => { for (let i = 0; i < n; i++) { counterData.count++; } },
+        currentValue: () => counterData.count
+      },
+      list: {
+        create: (n) => {
+          const rows = [];
+          for (let i = 0; i < n; i++) {
+            rows.push({ id: nextId++, label: randomLabel() });
+          }
+          listData.rows = rows;
+        },
+        updatePartial: () => {
+          listData.rows = listData.rows.map((row, index) =>
+            index % 10 === 0 ? { ...row, label: row.label + ' !!!' } : row
+          );
+        },
+        swap: () => {
+          const rows = listData.rows.slice();
+          if (rows.length > 998) {
+            [rows[1], rows[998]] = [rows[998], rows[1]];
+          } else if (rows.length > 1) {
+            [rows[0], rows[rows.length - 1]] = [rows[rows.length - 1], rows[0]];
+          }
+          listData.rows = rows;
+        },
+        remove: () => {
+          if (listData.rows.length === 0) { return; }
+          listData.rows = listData.rows.slice(1);
+        },
+        clear: () => { listData.rows = []; },
+        countRows: () => listData.rows.length
+      },
+      conditional: {
+        reset: () => { conditionalData.open = false; },
+        toggle: (n) => { for (let i = 0; i < n; i++) { conditionalData.open = !conditionalData.open; } },
+        currentState: () => conditionalData.open
+      },
+      binding: {
+        reset: () => { bindingData.text = ''; },
+        write: (n) => {
+          for (let i = 0; i < n; i++) {
+            bindingField.value = `value-${i}`;
+            bindingField.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        },
+        currentValue: () => bindingData.text
+      }
+  };
+</script>
+
+</body>
+</html>

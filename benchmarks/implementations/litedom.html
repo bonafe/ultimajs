@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Litedom — benchmark implementation</title>
+</head>
+<body>
+
+<bench-counter id="counter"></bench-counter>
+<bench-list id="list"></bench-list>
+<bench-conditional id="conditional"></bench-conditional>
+<bench-binding id="binding"></bench-binding>
+
+<script type="module">
+  import Litedom from 'https://unpkg.com/litedom';
+
+  Litedom({
+    tagName: 'bench-counter',
+    template: `<span class="value">{this.count}</span>`,
+    data: { count: 0 },
+    reset() { this.data.count = 0; },
+    incrementTimes(n) {
+      for (let i = 0; i < n; i++) { this.data.count = this.data.count + 1; }
+    },
+    currentValue() { return this.data.count; }
+  });
+
+  Litedom({
+    tagName: 'bench-conditional',
+    template: `
+      <span :if="this.open" class="visible-block">visible</span>
+      <span :else class="hidden-block">hidden</span>
+    `,
+    data: { open: false },
+    reset() { this.data.open = false; },
+    toggleTimes(n) {
+      for (let i = 0; i < n; i++) { this.data.open = !this.data.open; }
+    },
+    currentState() { return this.data.open; }
+  });
+
+  Litedom({
+    tagName: 'bench-binding',
+    template: `
+      <input class="field" type="text" @bind="text">
+      <span class="echo">{this.text}</span>
+    `,
+    data: { text: '' },
+    reset() { this.data.text = ''; },
+    writeTimes(n) {
+      const field = document.querySelector('#binding .field');
+      for (let i = 0; i < n; i++) {
+        field.value = `value-${i}`;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    },
+    currentValue() { return this.data.text; }
+  });
+
+  let nextId = 1;
+  const ADJECTIVES = ['fast', 'slow', 'big', 'small', 'blue', 'green', 'red', 'light', 'dark', 'new'];
+  const NOUNS = ['car', 'table', 'cloud', 'river', 'hill', 'wind', 'field', 'port', 'valley', 'lake'];
+  function randomLabel() {
+    const a = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+    const n = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+    return `${a} ${n}`;
+  }
+
+  Litedom({
+    tagName: 'bench-list',
+    template: `
+      <table><tbody>
+        <tr :for="row in this.rows" :key="row-{row.id}">
+          <td class="id-column">{row.id}</td>
+          <td class="label-column">{row.label}</td>
+        </tr>
+      </tbody></table>
+    `,
+    data: { rows: [] },
+    create(n) {
+      const rows = [];
+      for (let i = 0; i < n; i++) {
+        rows.push({ id: nextId++, label: randomLabel() });
+      }
+      this.data.rows = rows;
+    },
+    updatePartial() {
+      this.data.rows = this.data.rows.map((row, index) =>
+        index % 10 === 0 ? { ...row, label: row.label + ' !!!' } : row
+      );
+    },
+    swap() {
+      const rows = this.data.rows.slice();
+      if (rows.length > 998) {
+        [rows[1], rows[998]] = [rows[998], rows[1]];
+      } else if (rows.length > 1) {
+        [rows[0], rows[rows.length - 1]] = [rows[rows.length - 1], rows[0]];
+      }
+      this.data.rows = rows;
+    },
+    remove() {
+      if (this.data.rows.length === 0) { return; }
+      this.data.rows = this.data.rows.slice(1);
+    },
+    clear() { this.data.rows = []; },
+    countRows() { return this.data.rows.length; }
+  });
+
+  const elCounter = document.getElementById('counter');
+  const elList = document.getElementById('list');
+  const elConditional = document.getElementById('conditional');
+  const elBinding = document.getElementById('binding');
+
+  window.bench = {
+    ready: Promise.resolve(),
+    counter: {
+      reset: () => elCounter.reset(),
+      increment: (n) => elCounter.incrementTimes(n),
+      currentValue: () => elCounter.currentValue()
+    },
+    list: {
+      create: (n) => elList.create(n),
+      updatePartial: () => elList.updatePartial(),
+      swap: () => elList.swap(),
+      remove: () => elList.remove(),
+      clear: () => elList.clear(),
+      countRows: () => elList.countRows()
+    },
+    conditional: {
+      reset: () => elConditional.reset(),
+      toggle: (n) => elConditional.toggleTimes(n),
+      currentState: () => elConditional.currentState()
+    },
+    binding: {
+      reset: () => elBinding.reset(),
+      write: (n) => elBinding.writeTimes(n),
+      currentValue: () => elBinding.currentValue()
+    }
+  };
+</script>
+
+</body>
+</html>

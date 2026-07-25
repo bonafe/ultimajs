@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Ultima</title>
+<meta name="description" content="The history and philosophy behind Ultima/UltimaJS.">
+<link rel="stylesheet" href="./assets/estilo.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Home</span></a>
+    <a href="./getting-started.html"><span class="rotulo-nav">Docs</span></a>
+    <a href="./examples.html"><span class="rotulo-nav">Examples</span></a>
+    <a href="./benchmarks/index.html"><span class="rotulo-nav">Benchmark</span></a>
+    <a href="./comparison.html"><span class="rotulo-nav">Comparison</span></a>
+    <a href="./about.html" class="ativo"><span class="rotulo-nav">About</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <section class="secao" style="max-width: 720px;">
+    <h1 style="font-size: 2.2rem; color: var(--branco-suave); margin-bottom: 8px;">About Ultima</h1>
+    <p style="font-size: 1.05rem;">The history and philosophy behind the project.</p>
+
+    <h2 style="color: var(--branco-suave); margin-top: 40px;">Origin</h2>
+    <p>
+      Ultima started in 2020 as a treemap visualization prototype, inspired by Mike Bostock's classic
+      D3.js examples — <em>Thinking with Joins</em>, <em>General Update Pattern</em>, <em>Les
+      Misérables Co-occurrence</em> — to display elements in a Model-View-Controller-style
+      architecture, with IndexedDB persistence. It later grew to include a second, window-based view,
+      and its own reactive component system.
+    </p>
+
+    <h2 style="color: var(--branco-suave);">Why Vanilla JS</h2>
+    <p>
+      The conviction behind the project: writing code that runs natively in browsers is a good
+      practice, not a limitation. Ultima uses <code class="linha">Custom Elements</code>,
+      <code class="linha">Shadow DOM</code>, <code class="linha">ResizeObserver</code>,
+      <code class="linha">IndexedDB</code> and native ES modules directly — with no abstraction layer
+      on top, no build step, no runtime dependency beyond what the browser already provides.
+      Third-party libraries used for specific features (D3.js for the treemap, vis.js for graphs,
+      jsPanel for windows) are downloaded once and vendored in the repository, not installed via a
+      package manager or loaded from a CDN in production.
+    </p>
+
+    <h2 style="color: var(--branco-suave);">Current state</h2>
+    <p>
+      This is a personal project, maintained continuously since 2020, with parts at varying degrees
+      of maturity — some well tested (the reactive core, the data schema), others still experimental
+      or incomplete. There's no published package or formal community around it — the source code on
+      GitHub is the source of truth.
+    </p>
+
+    <h2 style="color: var(--branco-suave);">License</h2>
+    <p>
+      The project is distributed under <a href="https://github.com/bonafe/ultima/blob/master/LICENSE" target="_blank" rel="noopener">CC0 1.0 Universal</a> — effectively public domain, with no usage restrictions.
+    </p>
+
+    <p style="margin-top: 40px;">
+      <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener" class="botao botao-secundario">View the source on GitHub</a>
+    </p>
+  </section>
+</main>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./about.html">About</a>
+    <a href="./getting-started.html">Docs</a>
+  </div>
+  <div>CC0 license (public domain) · Personal project, maintained since 2020</div>
+</footer>
+
+</body>
+</html>

@@ -1,24 +1,24 @@
 import { GrafoBases } from "./grafo_bases.js";
 import { Evento } from "../../espaco/evento.js";
-import { ComponenteBase } from "../../componente_base.js";
+import { ComponentBase } from "../../component_base.js";
 
 export class GrafoIndexedDB extends GrafoBases{
 
     constructor(){
         super();      
         
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
             
             this.carregarIndexedDB().then(() => {
-                this.renderizar();
+                this.render();
             });
         });        
     }
 
-    renderizar(){        
-        if (this.dados){
-            if (Object.entries(this.dados).length > 0){
-                super.renderizar();
+    render(){        
+        if (this.state){
+            if (Object.entries(this.state).length > 0){
+                super.render();
             }
         }
     }

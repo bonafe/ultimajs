@@ -1,14 +1,14 @@
-import { ComponenteBase } from "../../componente_base.js";
+import { ComponentBase } from "../../component_base.js";
 import { EditorJSON } from "../../dados/json/editor/editor_json.js";
 import { Evento } from "../evento.js";
 
-export class Configuracao extends ComponenteBase{
+export class Configuracao extends ComponentBase{
 
     constructor(){
-        super({templateURL:"./configuracao.html", shadowDOM:true}, import.meta.url);        
+        super({templateUrl:"./configuracao.html", shadowDom:true}, import.meta.url);        
    
         
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
 
             this.tratarDownloadConfiguracao();
             this.tratarEventoMudancaDados();            
@@ -26,13 +26,13 @@ export class Configuracao extends ComponenteBase{
     tratarDownloadConfiguracao(){
 
         let estilos = document.createElement("link");
-        super.no_raiz.appendChild(estilos);
+        super.rootNode.appendChild(estilos);
         estilos.setAttribute("rel", "stylesheet");
         estilos.setAttribute("href","componentes/espaco/visualizacao/visualizacao.css")
 
 
         let div = document.createElement("div");
-        super.no_raiz.insertBefore(div, super.no_raiz.querySelector("#editorJSON"));
+        super.rootNode.insertBefore(div, super.rootNode.querySelector("#editorJSON"));
         div.classList.add("navegacao_ultima");
         div.classList.add("cabecalho_principal_ultima");
         
@@ -43,7 +43,7 @@ export class Configuracao extends ComponenteBase{
         a.href = "#";
         a.textContent = "Download Configuração";
         a.onclick = () => {
-            this.downloadObjectAsJson(this.dados, "configuracao");
+            this.downloadObjectAsJson(this.state, "configuracao");
         };        
     }
 

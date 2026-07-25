@@ -1,5 +1,5 @@
 import { Elemento } from '../elemento.js';
-import { ComponenteBase } from '../../../componente_base.js';
+import { ComponentBase } from '../../../component_base.js';
 
 
 
@@ -10,14 +10,14 @@ export class ElementoJanela extends Elemento {
     constructor(){
         super();
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {  
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {  
         });
     }
 
    
     
-    renderizar(){
-        super.renderizar();
+    render(){
+        super.render();
     }
 }
 customElements.define('elemento-janela', ElementoJanela);

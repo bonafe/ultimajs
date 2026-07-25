@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examples — Ultima</title>
+<meta name="description" content="A complete reactive form and the Workspace, the project's reference application.">
+<link rel="stylesheet" href="./assets/estilo.css">
+<style>
+  .captura { width: 100%; border-radius: var(--raio-borda); border: var(--borda-sutil); box-shadow: var(--sombra-elevacao); margin: 20px 0 8px; }
+  .legenda { font-size: 0.85rem; color: var(--cinza-400); text-align: center; margin: 0 0 24px; }
+</style>
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Home</span></a>
+    <a href="./getting-started.html"><span class="rotulo-nav">Docs</span></a>
+    <a href="./examples.html" class="ativo"><span class="rotulo-nav">Examples</span></a>
+    <a href="./benchmarks/index.html"><span class="rotulo-nav">Benchmark</span></a>
+    <a href="./comparison.html"><span class="rotulo-nav">Comparison</span></a>
+    <a href="./about.html"><span class="rotulo-nav">About</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs">
+
+  <aside class="sidebar-docs">
+    <div class="grupo">
+      <div class="titulo-grupo">Getting started</div>
+      <a href="./getting-started.html">Getting started</a>
+      <a href="./guide.html">Guide</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Reference</div>
+      <a href="./reference.html">Template DSL</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Hands-on</div>
+      <a href="./examples.html" class="ativo">Examples</a>
+    </div>
+  </aside>
+
+  <article class="conteudo-docs">
+    <h1>Examples</h1>
+    <p class="chapeu">
+      Two real examples from the repository — a small form that exercises the whole DSL at once, and
+      the full application the project has used as its proving ground from the start.
+    </p>
+
+    <h2>Form with nested components</h2>
+    <p>
+      In <code class="linha">src/html/componentes/z.example/</code>: a
+      <code class="linha">br-test</code> component with every kind of binding — text, checkbox, a
+      three-branch conditional chain, and a keyed list of addresses, where each item is itself
+      another reactive component (<code class="linha">br-address</code>) receiving data via
+      <code class="linha">data-bind</code>.
+    </p>
+    <div class="bloco-codigo">
+      <div class="barra">
+        <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+        <span class="titulo-arquivo">br-test.html (excerpt)</span>
+      </div>
+      <pre><code>&lt;<span class="tag">template</span> <span class="atr">data-if</span>=<span class="str">"show_address"</span>&gt;
+  &lt;<span class="tag">div</span> <span class="atr">id</span>=<span class="str">"addresses"</span>&gt;
+    &lt;<span class="tag">template</span> <span class="atr">data-for</span>=<span class="str">"address, index in addresses : zip"</span>&gt;
+      &lt;<span class="tag">br-address</span> <span class="atr">data-bind</span>=<span class="str">'{"data-state":"address"}'</span>&gt;&lt;/<span class="tag">br-address</span>&gt;
+    &lt;/<span class="tag">template</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
+    </div>
+    <p>
+      <a href="https://github.com/bonafe/ultima/blob/master/src/html/componentes/z.example/br-test.html" target="_blank" rel="noopener">See the full file on GitHub →</a>
+    </p>
+
+    <h2>Workspace — the reference application</h2>
+    <p>
+      Ultima started in 2020 as a treemap visualization prototype, and the "Workspace" is still the
+      application that validates the framework in practice: an environment where you add elements —
+      videos, images, iframes, graphs, data panels — and arrange them in one of two switchable views,
+      with all state persisted in the browser via IndexedDB. No backend.
+    </p>
+
+    <img class="captura" src="./assets/captura-treemap.jpg" alt="Screenshot of the Workspace showing three elements side by side in a treemap layout: a blue touch panel, an embedded YouTube video and an interactive graph of the local database schema.">
+    <p class="legenda">The Workspace in action: three elements (touch, video, a graph of its own local database) automatically arranged by the treemap layout.</p>
+
+    <p>
+      The second view arranges the same elements in floating, draggable, resizable windows —
+      switching between the two is a menu action, with no data lost.
+    </p>
+
+    <div class="aviso">
+      The Workspace isn't just a demo — it's where real bugs in the framework show up first. The
+      <a href="./about.html">About page</a> has more context on the project's origin.
+    </div>
+
+    <div class="paginacao-docs">
+      <a href="./reference.html">
+        <span>← DSL reference</span>
+      </a>
+      <span></span>
+    </div>
+  </article>
+
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./about.html">About</a>
+    <a href="./getting-started.html">Docs</a>
+  </div>
+  <div>CC0 license (public domain) · Personal project, maintained since 2020</div>
+</footer>
+
+</body>
+</html>

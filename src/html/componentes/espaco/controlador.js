@@ -1,7 +1,7 @@
-import { ControladorBase } from "../controlador_base.js";
+import { ControllerBase } from "../controller_base.js";
 import { Evento } from "./evento.js";
 
-export class ControladorEspaco extends ControladorBase{
+export class ControladorEspaco extends ControllerBase{
 
     constructor(){
         super();

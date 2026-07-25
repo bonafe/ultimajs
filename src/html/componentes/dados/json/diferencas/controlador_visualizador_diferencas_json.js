@@ -1,10 +1,10 @@
-import { ControladorBase } from "../../../controlador_base.js";
+import { ControllerBase } from "../../../controller_base.js";
 import { LeitorEspacoDB } from "../../../espaco/modelo/leitor_espaco_db.js";
 import { Evento } from "../../../espaco/evento.js";
 
 
 
-export class ControladorVisualizadorDiferencasJSON extends ControladorBase{
+export class ControladorVisualizadorDiferencasJSON extends ControllerBase{
 
 
 
@@ -62,8 +62,8 @@ export class ControladorVisualizadorDiferencasJSON extends ControladorBase{
                                
 
                     let dados = {
-                        esquerda: elementoEsquerda.dados,
-                        direita: elementoDireita.dados
+                        esquerda: elementoEsquerda.state,
+                        direita: elementoDireita.state
                     };
 
                     let eventoCompleto = new Evento(Evento.EVENTO_ATUALIZACAO_ELEMENTO, {                                    

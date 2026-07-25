@@ -1,28 +1,28 @@
 
-import { ComponenteBase } from '../componente_base.js';
+import { ComponentBase } from '../component_base.js';
 
 import { Evento } from '../espaco/evento.js';
 
 
 
-export class VisualizadorToque extends ComponenteBase {
+export class VisualizadorToque extends ComponentBase {
 
 
 
     constructor(){
-        super({templateURL:"./visualizador_toque.html", shadowDOM:true}, import.meta.url);        
+        super({templateUrl:"./visualizador_toque.html", shadowDom:true}, import.meta.url);        
 
 
         this.toques_ativos = {};
 
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {                        
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {                        
             
-            this.canvas = super.no_raiz.querySelector("#visualizadorToque");
+            this.canvas = super.rootNode.querySelector("#visualizadorToque");
             
             this.iniciar_eventos_toque();
 
-            this.renderizar();
+            this.render();
         });
     }
 
@@ -39,9 +39,9 @@ export class VisualizadorToque extends ComponenteBase {
 
 
 
-    renderizar(){
+    render(){
         
-        if (super.carregado && !this.renderizado){
+        if (super.loaded && !this.renderizado){
             
             this.renderizado = true;            
         }        
@@ -230,7 +230,7 @@ export class VisualizadorToque extends ComponenteBase {
 
 
     log(msg) {
-        let p = super.no_raiz.querySelector("#log");
+        let p = super.rootNode.querySelector("#log");
         p.innerHTML = msg + "\n" + p.innerHTML;
     }
 

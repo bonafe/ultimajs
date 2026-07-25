@@ -7,18 +7,18 @@ export class BindableHTMLElement extends HTMLElement{
     constructor(template){
         super();
 
-		this.carregado = false;
+		this.loaded = false;
 
-		//Guardando modificadores para conseguir limpar
-		this.mascaras = [];
+		//Keeping track of masks so we can clean them up
+		this.masks = [];
 		this.listeners = [];
-		
+
         this._state = undefined;
         this._shadowRoot = this.attachShadow({mode: 'open'});
 
-		this.template = template;	
+		this.template = template;
 		if (this.template){
-			this.carregarTemplate();
+			this.loadTemplate();
 		}
 
         let script = document.createElement("script");
@@ -32,48 +32,48 @@ export class BindableHTMLElement extends HTMLElement{
         return this._shadowRoot;
     }
 
-	
-	async carregarTemplate(){
 
-		//TODO: testar
-		//Se um elemento template foi passado no construtor
+	async loadTemplate(){
+
+		//TODO: test
+		//If a template element was passed to the constructor
 		if (this.template instanceof HTMLElement){
-			
-			this.shadowRoot.appendChild(template.content.cloneNode(true));			
-			this.carregouComponente();		
-			
-			
-			
-		//Caso o elemento seja do tipo String	
-		}else if (((typeof this.template).localeCompare("string") ==0) || (this.template instanceof String)) {				
-		
-			//Carrega via o conteúdo via Fetch
-			let resposta = await fetch(this.template);
-			let textoPagina = await resposta.text();
-						
-			let template = document.createElement('template');
-			template.innerHTML = textoPagina;
+
 			this.shadowRoot.appendChild(template.content.cloneNode(true));
-			
-			this.carregouComponente();							
+			this.componentLoaded();
+
+
+
+		//If the element is a String
+		}else if (((typeof this.template).localeCompare("string") ==0) || (this.template instanceof String)) {
+
+			//Loads the content via Fetch
+			let response = await fetch(this.template);
+			let pageText = await response.text();
+
+			let template = document.createElement('template');
+			template.innerHTML = pageText;
+			this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+			this.componentLoaded();
 		}
 	}
 
 
 
-	carregouComponente(){
-		this.inicializarElementos();					
-        this.atualizacaoInicial();
-		this.carregado = true;
-		this.dispatchEvent(new Event(ComponenteBase.EVENTO_CARREGOU));	
+	componentLoaded(){
+		this.initializeElements();
+        this.initialUpdate();
+		this.loaded = true;
+		this.dispatchEvent(new Event(ComponentBase.LOADED_EVENT));
 	}
 
 
 
     set state(newState){
-        //A função setTimeout irá garantir que o estado apenas será atribuido quando todos componentes tiverem sido criados
+        //The setTimeout call ensures state is only assigned once every component has been created
         setTimeout(() => {
-            this.atualizarEstado(this._state, newState);
+            this.updateState(this._state, newState);
             this._state = newState;
         });
     }
@@ -86,52 +86,52 @@ export class BindableHTMLElement extends HTMLElement{
 
 
 
-    atualizacaoInicial(){
-        this.atualizarEstado(null, this._state)
+    initialUpdate(){
+        this.updateState(null, this._state)
     }
 
 
-    atualizarEstado(estadoAtual, novoEstado){
+    updateState(currentState, newState){
 
-        let elementos = this._shadowRoot.querySelectorAll("[data-bind]");
-        elementos.forEach (elemento =>{
+        let elements = this._shadowRoot.querySelectorAll("[data-bind]");
+        elements.forEach (element =>{
 
 
-            let jsonDataBind = JSON.parse(elemento.dataset.bind);
+            let bindJson = JSON.parse(element.dataset.bind);
 
-            Object.entries(jsonDataBind).forEach (bindInfo => {
+            Object.entries(bindJson).forEach (bindInfo => {
 
-                const [propriedadeElemento, caminhoEstado] = bindInfo;
+                const [elementProperty, statePath] = bindInfo;
 
-                let valorAtual = (estadoAtual == null? null: this.trazerValor(estadoAtual, caminhoEstado.split(".")));
-                let novoValor = this.trazerValor(novoEstado, caminhoEstado.split("."));
+                let currentValue = (currentState == null? null: this.getValue(currentState, statePath.split(".")));
+                let newValue = this.getValue(newState, statePath.split("."));
 
-                if (valorAtual != novoValor){
+                if (currentValue != newValue){
 
-                    //textContent precisa ser acessado diretamente
-                    if (propriedadeElemento.localeCompare("textContent") == 0){
+                    //textContent needs to be accessed directly
+                    if (elementProperty.localeCompare("textContent") == 0){
 
-                        elemento.textContent = novoValor;
+                        element.textContent = newValue;
 
-                    //Outras propriedades podem ser utilizadas como chave
+                    //Other properties can be used as the key
                     }else{
-	
-						
-						if((elemento.tagName.toLowerCase() === 'input') &&
-						   (elemento.type.toLowerCase() === 'datetime-local')){
-							
-							console.debug(`[BindableHTMLElement] Elemento data hora ENTRADA: ${novoValor}`);
-							
-							let dataHora = new Date(novoValor);							
-							//Leva a data/hora para o timezone do usuário para exibi-la no input
-							dataHora.setMinutes(dataHora.getMinutes() - dataHora.getTimezoneOffset());
-							//O input do tipo datetime-local precisa receber 16 caracteres
-							novoValor = dataHora.toISOString().slice(0, 16);					
-							
-							console.debug(`[BindableHTMLElement] Elemento data hora SAÍDA: ${novoValor}`);
+
+
+						if((element.tagName.toLowerCase() === 'input') &&
+						   (element.type.toLowerCase() === 'datetime-local')){
+
+							console.debug(`[BindableHTMLElement] Date/time element INPUT: ${newValue}`);
+
+							let dateTime = new Date(newValue);
+							//Moves the date/time into the user's timezone to display it in the input
+							dateTime.setMinutes(dateTime.getMinutes() - dateTime.getTimezoneOffset());
+							//The datetime-local input type needs to receive 16 characters
+							newValue = dateTime.toISOString().slice(0, 16);
+
+							console.debug(`[BindableHTMLElement] Date/time element OUTPUT: ${newValue}`);
 						}
-						
-                        elemento[propriedadeElemento] = novoValor;
+
+                        element[elementProperty] = newValue;
                     }
                 }
             });
@@ -140,16 +140,16 @@ export class BindableHTMLElement extends HTMLElement{
 
 
 
-    trazerValor (objeto, caminhos){
-        if (objeto === undefined){
+    getValue (object, path){
+        if (object === undefined){
             return undefined;
         }else{
-            let caminhoDesteNivel = caminhos.shift();
-            if (caminhos.length > 0){
-                return this.trazerValor (objeto[caminhoDesteNivel], caminhos);
+            let currentStep = path.shift();
+            if (path.length > 0){
+                return this.getValue (object[currentStep], path);
             }else{
-                if (objeto !== null){
-                    return objeto[caminhoDesteNivel];
+                if (object !== null){
+                    return object[currentStep];
                 }else{
                     return null
                 }
@@ -159,91 +159,92 @@ export class BindableHTMLElement extends HTMLElement{
 
 
 
-    definirValor (objeto, caminhos, valor){
-        let caminhoDesteNivel = caminhos.shift();
-        if (caminhos.length > 0){
-            this.definirValor (objeto[caminhoDesteNivel], caminhos, valor);
+    setValue (object, path, value){
+        let currentStep = path.shift();
+        if (path.length > 0){
+            this.setValue (object[currentStep], path, value);
         }else{
-            objeto[caminhoDesteNivel] = valor;
+            object[currentStep] = value;
         }
     }
 
 
 
     connectedCallback(){
-    	
-        this.inicializarElementos();
+
+        this.initializeElements();
     }
 
-	inicializarElementos(){
-	
-		//Limpa as máscaras
-		while (this.mascaras.length){		
-			this.mascaras.pop().destroy();
-		}
-	
-		//Processa a máscara
-        this._shadowRoot.querySelectorAll("[data-mask]").forEach (elemento =>{
+	initializeElements(){
 
-            //A mascara vem como JSON mas o IMask precisa que os valores Number (TODO: verificar outros casos) sejam transformados no tipo nativo
-            let mascara = JSON.parse(elemento.dataset.mask);
-            this.transformarMascara(mascara);
-            this.mascaras.push(IMask (elemento, mascara));
+		//Clears the masks
+		while (this.masks.length){
+			this.masks.pop().destroy();
+		}
+
+		//Processes the mask
+        this._shadowRoot.querySelectorAll("[data-mask]").forEach (element =>{
+
+            //The mask comes as JSON but IMask needs Number values (TODO: check other cases) to be
+            //converted to the native type
+            let mask = JSON.parse(element.dataset.mask);
+            this.transformMask(mask);
+            this.masks.push(IMask (element, mask));
         });
 
 
-		//Limpa os listeners caso existam
+		//Clears existing listeners, if any
 		while (this.listeners.length){
 			let listener = this.listeners.pop();
-			listener.elemento.removeEventListener(listener.evento, listener.funcao);
+			listener.element.removeEventListener(listener.event, listener.callback);
 		}
 
-        //Processa o data bind
-        this._shadowRoot.querySelectorAll("[data-bind]").forEach (elemento =>{
-			
-			//TODO: escutando apenas change
+        //Processes the data bind
+        this._shadowRoot.querySelectorAll("[data-bind]").forEach (element =>{
+
+			//TODO: only listening to change
 			let listener = {
-				elemento: elemento,
-				evento: "change",
-				funcao: this.gerarFuncaoMudouConteudo(JSON.parse(elemento.dataset.bind))
+				element: element,
+				event: "change",
+				callback: this.createContentChangedHandler(JSON.parse(element.dataset.bind))
 			};
 			this.listeners.push(listener)
-            
-            elemento.addEventListener(listener.evento, listener.funcao);
+
+            element.addEventListener(listener.event, listener.callback);
         });
 	}
 
-	gerarFuncaoMudouConteudo (jsonDataBind){
-		return event => {		
+	createContentChangedHandler (bindJson){
+		return event => {
 
-		    Object.entries(jsonDataBind).forEach (bindInfo => {
-		
-		        const [propriedadeElemento, caminhoEstado] = bindInfo;
-		
-		        //Clona o estado atual
-		        let novoEstado = JSON.parse(JSON.stringify(this._state));
-		
-		        this.definirValor(novoEstado, caminhoEstado.split("."), event.target[propriedadeElemento]);
-		
-		        //O change de um elemento pode repercurtir em outros
-		        this.atualizarEstado(this._state, novoEstado);
-		
-		        this._state = novoEstado;
+		    Object.entries(bindJson).forEach (bindInfo => {
+
+		        const [elementProperty, statePath] = bindInfo;
+
+		        //Clones the current state
+		        let newState = JSON.parse(JSON.stringify(this._state));
+
+		        this.setValue(newState, statePath.split("."), event.target[elementProperty]);
+
+		        //One element's change can ripple into others
+		        this.updateState(this._state, newState);
+
+		        this._state = newState;
 		    });
 		};
 	}
 
-    transformarMascara(mascara){
-        Object.keys(mascara).forEach (chave => {
+    transformMask(mask){
+        Object.keys(mask).forEach (key => {
 
-            if (typeof mascara[chave] == "object"){
+            if (typeof mask[key] == "object"){
 
-                this.transformarMascara(mascara[chave]);
+                this.transformMask(mask[key]);
 
-            }else if (typeof mascara[chave] == "string"){
+            }else if (typeof mask[key] == "string"){
 
-                if (mascara[chave].localeCompare("Number") == 0){
-                    mascara[chave] = Number;
+                if (mask[key].localeCompare("Number") == 0){
+                    mask[key] = Number;
                 }
             }
         });

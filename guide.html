@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide — Ultima</title>
+<meta name="description" content="Ultima's core concepts: ComponentBase and ReactiveComponent, lifecycle, data scope.">
+<link rel="stylesheet" href="./assets/estilo.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Home</span></a>
+    <a href="./getting-started.html" class="ativo"><span class="rotulo-nav">Docs</span></a>
+    <a href="./examples.html"><span class="rotulo-nav">Examples</span></a>
+    <a href="./benchmarks/index.html"><span class="rotulo-nav">Benchmark</span></a>
+    <a href="./comparison.html"><span class="rotulo-nav">Comparison</span></a>
+    <a href="./about.html"><span class="rotulo-nav">About</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs">
+
+  <aside class="sidebar-docs">
+    <div class="grupo">
+      <div class="titulo-grupo">Getting started</div>
+      <a href="./getting-started.html">Getting started</a>
+      <a href="./guide.html" class="ativo">Guide</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Reference</div>
+      <a href="./reference.html">Template DSL</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Hands-on</div>
+      <a href="./examples.html">Examples</a>
+    </div>
+  </aside>
+
+  <article class="conteudo-docs">
+    <h1>Guide</h1>
+    <p class="chapeu">
+      Every Ultima component extends, directly or indirectly, <code class="linha">ComponentBase</code>.
+      Components that need declarative data binding extend <code class="linha">ReactiveComponent</code>,
+      which in turn extends <code class="linha">ComponentBase</code>.
+    </p>
+
+    <h2>ComponentBase</h2>
+    <p>
+      Handles loading the external HTML template, optional isolation via Shadow DOM, and resolving
+      paths relative to the component's own module (not to the page that uses it).
+    </p>
+    <div class="bloco-codigo">
+      <pre><code><span class="tag">constructor</span>(properties, subclassUrl)</code></pre>
+    </div>
+    <ul>
+      <li><code class="linha">properties.templateUrl</code> — path to the template's HTML file, relative to the <code class="linha">.js</code> module.</li>
+      <li><code class="linha">properties.shadowDom</code> — <code class="linha">true</code> to isolate in Shadow DOM (<code class="linha">mode:'open'</code>); <code class="linha">false</code> to render directly as children of the element itself.</li>
+      <li><code class="linha">subclassUrl</code> — always the child class's <code class="linha">import.meta.url</code>.</li>
+    </ul>
+
+    <h3>The loaded event</h3>
+    <p>
+      <code class="linha">ComponentBase.LOADED_EVENT</code> ("<code class="linha">component-loaded</code>")
+      fires when the component — and all of its descendants that are also
+      <code class="linha">ComponentBase</code> — finish mounting. It bubbles
+      (<code class="linha">bubbles:true, composed:true</code>) and crosses Shadow DOM boundaries.
+    </p>
+    <div class="aviso">
+      <strong>Use <code class="linha">event.composedPath()[0]</code>, not
+      <code class="linha">event.target</code>.</strong> When a descendant component has its own
+      Shadow Root, the browser retargets the event as it crosses that boundary —
+      <code class="linha">event.target</code> shows up as the listening element itself, even when the
+      event came from a different descendant. Without this check, a listener can react to loads that
+      aren't its own — in practice this has already caused real re-render loops in this project.
+    </div>
+    <div class="bloco-codigo">
+      <pre><code><span class="tag">this</span>.addEventListener(ComponentBase.LOADED_EVENT, (event) =&gt; {
+    <span class="tag">if</span> (event.composedPath()[<span class="str">0</span>] !== <span class="tag">this</span>) {
+        <span class="tag">return</span>;
+    }
+    <span class="com">// only here: the component itself finished loading</span>
+});</code></pre>
+    </div>
+
+    <h2>ReactiveComponent</h2>
+    <p>
+      Adds declarative reactivity via <code class="linha">data-*</code> attributes read from the
+      template — the full list is in the <a href="./reference.html">DSL reference</a>. Here, the
+      concepts behind it.
+    </p>
+
+    <h3>State</h3>
+    <div class="bloco-codigo">
+      <pre><code><span class="tag">get</span> state()             <span class="com">// returns the current state</span>
+<span class="tag">set</span> state(newState)     <span class="com">// writes and re-renders, if anything changed</span></code></pre>
+    </div>
+    <p>
+      The <code class="linha">data-state</code> HTML attribute is also observed — changing it from
+      the outside (<code class="linha">setAttribute</code>) has the same effect as using the
+      <code class="linha">state</code> setter. Writes that don't change the content (compared by
+      value, not by reference) are ignored — they don't trigger a re-render or events.
+    </p>
+
+    <h3>Computed properties and watchers</h3>
+    <div class="bloco-codigo">
+      <pre><code>computed()     <span class="com">// -&gt; Object, derived from this.state, merged into every binding</span>
+watchers()   <span class="com">// -&gt; { "path": (newValue, oldValue) =&gt; {...} }</span></code></pre>
+    </div>
+    <p>
+      Override <code class="linha">computed()</code> to declare values derived from the raw state —
+      the return value is available to any binding (<code class="linha">data-bind</code>,
+      <code class="linha">data-if</code>, <code class="linha">data-class</code>,
+      <code class="linha">data-style</code>, <code class="linha">data-for</code>) as if it were a
+      regular piece of state. Override <code class="linha">watchers()</code> to react whenever a
+      specific path's value changes between one render and the next.
+    </p>
+
+    <h3>Scope</h3>
+    <p>
+      Every nesting level — the component's root, a resolved conditional branch, a list item — has
+      its own data scope. Inside a list item, the loop variable's name is available as if it were a
+      regular field, and whatever comes from the parent scope stays accessible (scope chains by
+      prototype). Two nested reactive components don't share scope: a child receives data explicitly
+      via <code class="linha">data-bind='{"data-state":"path"}'</code>.
+    </p>
+
+    <h3>List reconciliation</h3>
+    <p>
+      <code class="linha">data-for</code> can reconcile by key — when the item has a stable identity
+      field (declared, or inferred from <code class="linha">uuid</code>/<code class="linha">id</code>),
+      existing DOM nodes are reused and moved instead of being destroyed and recreated on every
+      render, preserving focus, scroll position and nested components' internal state. Full details
+      and syntax in the <a href="./reference.html">Reference</a>.
+    </p>
+
+    <div class="paginacao-docs">
+      <a href="./getting-started.html">
+        <span>← Getting started</span>
+      </a>
+      <a href="./reference.html" class="proxima">
+        Next
+        <span>DSL reference →</span>
+      </a>
+    </div>
+  </article>
+
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./about.html">About</a>
+    <a href="./getting-started.html">Docs</a>
+  </div>
+  <div>CC0 license (public domain) · Personal project, maintained since 2020</div>
+</footer>
+
+</body>
+</html>

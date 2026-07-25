@@ -1,0 +1,47 @@
+{
+  "description": "Reference benchmark result from benchmarks/index.html, generated locally. Each operation was repeated 5 times and the reported value is the median; the numbers below come from two complete, independent runs, one right after the other, to check reproducibility — including the two biggest outliers (Minze/binding and Lit/clear).",
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "generatedAt": "2026-07-25T02:09:40.485Z"
+  },
+  "methodology": {
+    "repetitions": 5,
+    "loopItems": 1000,
+    "rows": 1000,
+    "aggregation": "median",
+    "timing": "performance.now() around the operation + a double microtask flush (doesn't include browser repaint; requestAnimationFrame is paused by Chrome in background tabs, which would make automated measurement impossible)"
+  },
+  "runs": [
+    {
+      "label": "run 1",
+      "results": {
+        "Counter: 1000 increments":       { "ultima": 8.8,  "litedom": 39.7,  "alpine": 1.1,  "lit": 0.6,    "minze": 50.1,  "vanjs": 0.2 },
+        "Conditional: 1000 toggles":      { "ultima": 20.3, "litedom": 43.5,  "alpine": 1.5,  "lit": 0.2,    "minze": 52.1,  "vanjs": 0.1 },
+        "Binding: 1000 input changes":    { "ultima": 16.8, "litedom": 78.8,  "alpine": 26.0, "lit": 3.2,    "minze": 793.2, "vanjs": 2.5 },
+        "List: create 1000 rows":         { "ultima": 21.4, "litedom": 15.6,  "alpine": 101.3,"lit": 10.1,   "minze": 4.3,   "vanjs": 15.6 },
+        "List: update 1 in every 10 rows":{ "ultima": 12.2, "litedom": 167.7, "alpine": 13.8, "lit": 1.4,    "minze": 4.4,   "vanjs": 0.9 },
+        "List: swap 2 rows":              { "ultima": 21.3, "litedom": 196.8, "alpine": 11.1, "lit": 4.6,    "minze": 5.9,   "vanjs": 0.0 },
+        "List: remove 1 row":             { "ultima": 14.4, "litedom": 178.5, "alpine": 11.7, "lit": 1.8,    "minze": 5.8,   "vanjs": 0.0 },
+        "List: clear 1000 rows":          { "ultima": 1.4,  "litedom": 134.4, "alpine": 9.1,  "lit": 1388.4, "minze": 0.2,   "vanjs": 0.2 }
+      }
+    },
+    {
+      "label": "run 2",
+      "results": {
+        "Counter: 1000 increments":       { "ultima": 7.9,  "litedom": 37.2,  "alpine": 1.4,  "lit": 0.2,    "minze": 47.1,  "vanjs": 0.1 },
+        "Conditional: 1000 toggles":      { "ultima": 19.8, "litedom": 35.2,  "alpine": 1.3,  "lit": 0.2,    "minze": 65.0,  "vanjs": 0.1 },
+        "Binding: 1000 input changes":    { "ultima": 19.9, "litedom": 96.3,  "alpine": 29.0, "lit": 3.9,    "minze": 769.3, "vanjs": 3.9 },
+        "List: create 1000 rows":         { "ultima": 26.5, "litedom": 18.5,  "alpine": 104.9,"lit": 11.2,   "minze": 4.4,   "vanjs": 16.4 },
+        "List: update 1 in every 10 rows":{ "ultima": 12.0, "litedom": 165.8, "alpine": 16.4, "lit": 0.7,    "minze": 4.1,   "vanjs": 0.5 },
+        "List: swap 2 rows":              { "ultima": 11.5, "litedom": 185.5, "alpine": 11.2, "lit": 3.7,    "minze": 5.9,   "vanjs": 0.0 },
+        "List: remove 1 row":             { "ultima": 12.7, "litedom": 176.8, "alpine": 12.2, "lit": 2.3,    "minze": 4.3,   "vanjs": 0.0 },
+        "List: clear 1000 rows":          { "ultima": 2.6,  "litedom": 117.8, "alpine": 11.3, "lit": 1411.9, "minze": 0.3,   "vanjs": 0.2 }
+      }
+    }
+  ],
+  "observations": [
+    "Minze/Binding (~770-800ms): two-way binding isn't a documented Minze feature (see the methodology on the page); the implementation used re-renders the component's entire HTML string on every keystroke via on:input, which recreates the <input> itself on each of the 1000 changes — a real cost of that approach, not a native feature comparable to the others' data-model.",
+    "Lit/Clear 1000 rows (~1.4s): consistent across both runs, and orders of magnitude larger than creating those same 1000 rows (~10ms) or removing rows one at a time (~2ms). Lit's own documentation (https://lit.dev/docs/templates/lists/) notes that the repeat() directive is optimized for reordering/updating existing items, not for replacing the whole list at once — the 'clear everything at once' scenario appears to fall into that directive's non-optimized case.",
+    "Numbers shouldn't be read as 'X is N times faster than Y' outside the exact scenario measured — these are 8 batched synchronous operations, not real user interactions; see the full methodology note in benchmarks/index.html."
+  ]
+}

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template DSL Reference — Ultima</title>
+<meta name="description" content="Every data-* attribute in Ultima's template DSL, with syntax and an example.">
+<link rel="stylesheet" href="./assets/estilo.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Home</span></a>
+    <a href="./getting-started.html" class="ativo"><span class="rotulo-nav">Docs</span></a>
+    <a href="./examples.html"><span class="rotulo-nav">Examples</span></a>
+    <a href="./benchmarks/index.html"><span class="rotulo-nav">Benchmark</span></a>
+    <a href="./comparison.html"><span class="rotulo-nav">Comparison</span></a>
+    <a href="./about.html"><span class="rotulo-nav">About</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs">
+
+  <aside class="sidebar-docs">
+    <div class="grupo">
+      <div class="titulo-grupo">Getting started</div>
+      <a href="./getting-started.html">Getting started</a>
+      <a href="./guide.html">Guide</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Reference</div>
+      <a href="./reference.html" class="ativo">Template DSL</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Hands-on</div>
+      <a href="./examples.html">Examples</a>
+    </div>
+  </aside>
+
+  <article class="conteudo-docs">
+    <h1>Template DSL reference</h1>
+    <p class="chapeu">
+      The whole reactive vocabulary of <code class="linha">ReactiveComponent</code>, in one place.
+      Any path used in <code class="linha">data-if</code>, <code class="linha">data-else-if</code>
+      or as a <code class="linha">data-class</code> value accepts a leading <code class="linha">!</code>
+      to negate it (e.g. <code class="linha">data-if="!loading"</code>).
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Attribute</th><th>Where</th><th>Syntax</th><th>Effect</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>data-bind</code></td><td>any element</td><td><code>{"attribute":"path"}</code></td><td>Two-way attribute/property binding</td></tr>
+        <tr><td><code>data-class</code></td><td>any element</td><td><code>{"class":"boolean.path"}</code></td><td>Toggles CSS classes</td></tr>
+        <tr><td><code>data-style</code></td><td>any element</td><td><code>{"css-property":"path"}</code></td><td>Sets inline style properties</td></tr>
+        <tr><td><code>data-ref</code></td><td>any element</td><td><code>"name"</code></td><td>Exposes the element on <code>this.refs.name</code></td></tr>
+        <tr><td><code>data-if</code></td><td><code>&lt;template&gt;</code></td><td><code>"path"</code></td><td>Starts a conditional chain</td></tr>
+        <tr><td><code>data-else-if</code></td><td><code>&lt;template&gt;</code></td><td><code>"path"</code></td><td>Continues the conditional chain</td></tr>
+        <tr><td><code>data-else</code></td><td><code>&lt;template&gt;</code></td><td>(no value)</td><td>Unconditional fallback</td></tr>
+        <tr><td><code>data-for</code></td><td><code>&lt;template&gt;</code></td><td><code>"item in path [: key]"</code></td><td>Repeats the content for each item of an array</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="data-bind">data-bind</h2>
+    <p>
+      Attribute or property binding, both ways. In the data → DOM direction, the value read from the
+      path is applied following a sequence of special cases — <code class="linha">textContent</code>,
+      <code class="linha">checked</code> (for checkboxes), <code class="linha">value</code>,
+      <code class="linha">datetime-local</code> fields — before falling back to a generic
+      <code class="linha">setAttribute</code>.
+    </p>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">input</span> <span class="atr">data-bind</span>=<span class="str">'{"value":"name"}'</span>&gt;
+&lt;<span class="tag">input</span> <span class="atr">type</span>=<span class="str">"checkbox"</span> <span class="atr">data-bind</span>=<span class="str">'{"checked":"active"}'</span>&gt;
+&lt;<span class="tag">span</span> <span class="atr">data-bind</span>=<span class="str">'{"textContent":"name"}'</span>&gt;&lt;/<span class="tag">span</span>&gt;</code></pre>
+    </div>
+    <p>
+      In the DOM → data direction, any element with <code class="linha">data-bind</code> listens for
+      the native <code class="linha">change</code> event and writes the value it reads back to the
+      corresponding path — that's how an <code class="linha">&lt;input&gt;</code> becomes a two-way
+      binding, with no extra syntax.
+    </p>
+    <p>
+      The same syntax composes nested reactive components: <code class="linha">data-bind='{"data-state":"path"}'</code>
+      on a <code class="linha">&lt;child-component&gt;</code> passes a whole object down into it, both ways.
+    </p>
+
+    <h2 id="data-class">data-class</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">div</span> <span class="atr">data-class</span>=<span class="str">'{"highlight":"active", "error":"!valid"}'</span>&gt;&lt;/<span class="tag">div</span>&gt;</code></pre>
+    </div>
+    <p>Toggles each class via <code class="linha">classList.toggle</code>, based on the (boolean, or
+    negated with <code class="linha">!</code>) value of the corresponding path.</p>
+
+    <h2 id="data-style">data-style</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">div</span> <span class="atr">data-style</span>=<span class="str">'{"border-color":"statusColor"}'</span>&gt;&lt;/<span class="tag">div</span>&gt;</code></pre>
+    </div>
+    <p>Sets an inline style property from the path's value. If the value is
+    <code class="linha">undefined</code>/<code class="linha">null</code>, the property is removed.</p>
+
+    <h2 id="data-ref">data-ref</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">input</span> <span class="atr">data-ref</span>=<span class="str">"searchField"</span>&gt;
+
+<span class="com">// after rendering:</span>
+<span class="tag">this</span>.refs.searchField.focus();</code></pre>
+    </div>
+    <p>Exposes the element on <code class="linha">this.refs.name</code>. If more than one element uses
+    the same name (common inside a list), <code class="linha">this.refs.name</code> becomes an array.</p>
+
+    <h2 id="conditionals">Conditionals — data-if / data-else-if / data-else</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">template</span> <span class="atr">data-if</span>=<span class="str">"loading"</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Loading...&lt;/<span class="tag">p</span>&gt;
+&lt;/<span class="tag">template</span>&gt;
+&lt;<span class="tag">template</span> <span class="atr">data-else-if</span>=<span class="str">"error"</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Something went wrong.&lt;/<span class="tag">p</span>&gt;
+&lt;/<span class="tag">template</span>&gt;
+&lt;<span class="tag">template</span> <span class="atr">data-else</span>&gt;
+  &lt;<span class="tag">p</span>&gt;All good.&lt;/<span class="tag">p</span>&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
+    </div>
+    <p>
+      A chain is a sequence of consecutive sibling <code class="linha">&lt;template&gt;</code>
+      elements, starting with <code class="linha">data-if</code>, with zero or more
+      <code class="linha">data-else-if</code>, optionally ending in a single
+      <code class="linha">data-else</code>. The first truthy path wins.
+    </p>
+    <div class="aviso">
+      If the winning branch is the same as in the previous render, the content is
+      <strong>not</strong> destroyed and recreated — it's just reprocessed in place. This matters a
+      lot when there's a keyed <code class="linha">data-for</code> inside the branch: item identity
+      survives renders in which the condition didn't change.
+    </div>
+
+    <h2 id="data-for">Lists — data-for</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">template</span> <span class="atr">data-for</span>=<span class="str">"task in tasks : id"</span>&gt;
+  &lt;<span class="tag">li</span> <span class="atr">data-bind</span>=<span class="str">'{"textContent":"task.title"}'</span>&gt;&lt;/<span class="tag">li</span>&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
+    </div>
+    <p>
+      Syntax: <code class="linha">"item in path"</code>; optionally
+      <code class="linha">"item, index in path"</code> (also exposes the index); and a
+      <code class="linha">" : field"</code> suffix that declares the items' identity key.
+    </p>
+    <p>
+      With a usable key — explicit, or inferred when every item has a <code class="linha">uuid</code>
+      or <code class="linha">id</code> — the list does <strong>keyed reconciliation</strong>: the DOM
+      nodes of an item whose key is still present are reused and only repositioned, not recreated.
+      Without a key (or with a missing/duplicate key in a given pass), the whole list is rebuilt on
+      every render.
+    </p>
+
+    <div class="paginacao-docs">
+      <a href="./guide.html">
+        <span>← Guide</span>
+      </a>
+      <a href="./examples.html" class="proxima">
+        Next
+        <span>Examples →</span>
+      </a>
+    </div>
+  </article>
+
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./about.html">About</a>
+    <a href="./getting-started.html">Docs</a>
+  </div>
+  <div>CC0 license (public domain) · Personal project, maintained since 2020</div>
+</footer>
+
+</body>
+</html>

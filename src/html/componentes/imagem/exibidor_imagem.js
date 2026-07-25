@@ -1,16 +1,16 @@
-import { ComponenteBase } from '../componente_base.js';
+import { ComponentBase } from '../component_base.js';
 import { Evento } from '../espaco/evento.js';
 
 
-export class ExibidorImagem extends ComponenteBase {
+export class ExibidorImagem extends ComponentBase {
 
     constructor(){
-        super({templateURL:"./exibidor_imagem.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./exibidor_imagem.html", shadowDom:true}, import.meta.url);
 
         this._dados = undefined;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
-            this.img = super.no_raiz.querySelector("img");            
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
+            this.img = super.rootNode.querySelector("img");            
             this.atualizarImg();
         });
     }
@@ -25,7 +25,7 @@ export class ExibidorImagem extends ComponenteBase {
 
     
         if (nomeAtributo.localeCompare("dados") == 0){
-            this.dados = JSON.parse(novoValor);
+            this.state = JSON.parse(novoValor);
             this.atualizarImg();
         }
     }
@@ -33,10 +33,10 @@ export class ExibidorImagem extends ComponenteBase {
 
 
     atualizarImg(){
-        if (this.img && this.dados){
-            this.img.setAttribute("src", this.dados.src);    
+        if (this.img && this.state){
+            this.img.setAttribute("src", this.state.src);    
             /*        
-            fetch (this.dados.src).then (resposta =>
+            fetch (this.state.src).then (resposta =>
                 resposta.text().then( htmlPagina => {                    
                     let html_src = 'data:text/html;charset=utf-8,' + htmlPagina;
                     this.iFrame.setAttribute("src" , html_src);

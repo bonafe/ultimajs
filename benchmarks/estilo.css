@@ -1,5 +1,5 @@
-/* Estilos específicos da página de benchmark — complementa ../assets/estilo.css, reaproveitando
-   os tokens (--cinza-*, --acento, --borda-sutil etc.) já definidos lá. */
+/* Styles specific to the benchmark page — complements ../assets/estilo.css, reusing the tokens
+   (--cinza-*, --acento, --borda-sutil etc.) already defined there. */
 
 .viz-root {
     --serie-ultima:    #3987e5;

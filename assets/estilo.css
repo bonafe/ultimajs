@@ -1,6 +1,6 @@
-/* Design system do site — reaproveita a paleta e os tokens já estabelecidos no app Espaço
-   (src/html/componentes/espaco/variaveis_estilo.css), pra manter uma identidade visual só entre
-   a ferramenta e o material de apresentação dela. */
+/* Site design system — reuses the palette and tokens already established in the Workspace app
+   (src/html/componentes/espaco/variaveis_estilo.css), to keep a single visual identity between
+   the tool and its presentation material. */
 
 *, *::before, *::after {
     box-sizing: border-box;
@@ -75,7 +75,7 @@ code.linha {
     color: var(--branco-suave);
 }
 
-/* ---------- Cabeçalho ---------- */
+/* ---------- Header ---------- */
 
 .cabecalho-site {
     position: sticky;
@@ -199,7 +199,7 @@ code.linha {
     color: var(--branco-suave);
 }
 
-/* ---------- Blocos de código ---------- */
+/* ---------- Code blocks ---------- */
 
 .bloco-codigo {
     background: var(--cinza-900);
@@ -240,7 +240,7 @@ code.linha {
 .bloco-codigo .tag { color: rgb(255, 176, 89); }
 .bloco-codigo .com { color: var(--cinza-400); font-style: italic; }
 
-/* ---------- Seções gerais ---------- */
+/* ---------- General sections ---------- */
 
 .secao {
     max-width: 1080px;
@@ -289,7 +289,7 @@ code.linha {
     font-size: 0.94rem;
 }
 
-/* ---------- Layout de documentação ---------- */
+/* ---------- Docs layout ---------- */
 
 .layout-docs {
     display: grid;
@@ -439,7 +439,7 @@ code.linha {
     }
 }
 
-/* ---------- Rodapé ---------- */
+/* ---------- Footer ---------- */
 
 .rodape-site {
     border-top: var(--borda-sutil);

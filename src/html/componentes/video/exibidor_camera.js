@@ -1,23 +1,23 @@
-import { ComponenteBase } from '../componente_base.js';
+import { ComponentBase } from '../component_base.js';
 import { Evento } from '../espaco/evento.js';
 
 
 
-export class ExibidorCamera extends ComponenteBase {
+export class ExibidorCamera extends ComponentBase {
 
 
 
     constructor(){
-        super({templateURL:"./exibidor_camera.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./exibidor_camera.html", shadowDom:true}, import.meta.url);
 
         this.video = undefined;        
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {            
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {            
 
-            this.cameras = super.no_raiz.querySelector("#cameras");         
-            this.video = super.no_raiz.querySelector("#video");
-            this.downloadGravacao = super.no_raiz.querySelector("#downloadGravacao");
-            this.btnGravacao = super.no_raiz.querySelector("#btnGravacao");
+            this.cameras = super.rootNode.querySelector("#cameras");         
+            this.video = super.rootNode.querySelector("#video");
+            this.downloadGravacao = super.rootNode.querySelector("#downloadGravacao");
+            this.btnGravacao = super.rootNode.querySelector("#btnGravacao");
 
             this.cameras.addEventListener("change", ()=>{
                 this.iniciarCamera();
@@ -36,7 +36,7 @@ export class ExibidorCamera extends ComponenteBase {
                 }
             });
 
-            this.renderizar();
+            this.render();
         });
     }
 
@@ -53,11 +53,11 @@ export class ExibidorCamera extends ComponenteBase {
     
         if (nomeAtributo.localeCompare("dados") == 0){
 
-            this.dados = JSON.parse(novoValor);
-            console.log("Dados exibidor cãmera: %o",this.dados);
+            this.state = JSON.parse(novoValor);
+            console.log("Dados exibidor cãmera: %o",this.state);
 
-            if (this.dados.deviceId && this.cameras){
-                this.cameras.value = this.dados.deviceId;
+            if (this.state.deviceId && this.cameras){
+                this.cameras.value = this.state.deviceId;
                 this.iniciarCamera();
             }
         }
@@ -93,9 +93,9 @@ export class ExibidorCamera extends ComponenteBase {
     }
 
 
-    renderizar(){
+    render(){
         
-        if (super.carregado && !this.renderizado){
+        if (super.loaded && !this.renderizado){
             
             this.preencherCamerasDisponiveis().then(()=>{
                 this.iniciarCamera();            
@@ -160,8 +160,8 @@ export class ExibidorCamera extends ComponenteBase {
                     }
                 });
 
-                if (this.dados && this.dados.deviceId){
-                    this.cameras.value = this.dados.deviceId;
+                if (this.state && this.state.deviceId){
+                    this.cameras.value = this.state.deviceId;
                 }
 
                 this.renderizado = true;
@@ -181,8 +181,8 @@ export class ExibidorCamera extends ComponenteBase {
 
     mudouEstado(){
         console.log(`Salvando câmera: ${this.cameras.value}`);
-        this.dados = {deviceId: this.cameras.value};
-        this.dispatchEvent(new CustomEvent("change", {detail:this.dados}));
+        this.state = {deviceId: this.cameras.value};
+        this.dispatchEvent(new CustomEvent("change", {detail:this.state}));
     }
 }
 customElements.define('exibidor-camera', ExibidorCamera);

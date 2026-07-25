@@ -1,33 +1,33 @@
-import { ComponenteReativo } from '../../componente_reativo.js';
+import { ReactiveComponent } from '../../reactive_component.js';
 
-//Cenário de benchmark: binding bidirecional (data-mapa + evento nativo "change" escrevendo de volta
-//nos dados). escreverVezes(n) simula n alterações de valor em sequência, disparando o evento que o
-//binding do Ultima escuta para propagar DOM -> dados -> renderizar (inclusive o span refletindo de volta).
-export class BenchBinding extends ComponenteReativo {
+//Benchmark scenario: two-way binding (data-bind + native "change" event writing back to state).
+//writeTimes(n) simulates n value changes in sequence, firing the event Ultima's binding listens for
+//to propagate DOM -> state -> render (including the span reflecting the value back).
+export class BenchBinding extends ReactiveComponent {
 
     constructor() {
         super(
-            { templateURL: './bench-binding.html', shadowDOM: true },
+            { templateUrl: './bench-binding.html', shadowDom: true },
             import.meta.url
         );
 
-        this.dados = { texto: '' };
+        this.state = { text: '' };
     }
 
     reset() {
-        this.dados = { texto: '' };
+        this.state = { text: '' };
     }
 
-    escreverVezes(n) {
-        const campo = this.refs.campo;
+    writeTimes(n) {
+        const field = this.refs.field;
         for (let i = 0; i < n; i++) {
-            campo.value = `valor-${i}`;
-            campo.dispatchEvent(new Event('change'));
+            field.value = `value-${i}`;
+            field.dispatchEvent(new Event('change'));
         }
     }
 
-    valorAtual() {
-        return this.dados.texto;
+    currentValue() {
+        return this.state.text;
     }
 }
 

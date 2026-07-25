@@ -1,22 +1,22 @@
 
 
 
-import { ComponenteBase } from '../../componente_base.js';
+import { ComponentBase } from '../../component_base.js';
 import { Evento } from '../evento.js';
 import { LeitorEspacoDB } from "../modelo/leitor_espaco_db.js";
 
 
 
-export class Elemento extends ComponenteBase {
+export class Elemento extends ComponentBase {
 
     constructor(){
-        super({templateURL:"./elemento.html", shadowDOM:false}, import.meta.url);
+        super({templateUrl:"./elemento.html", shadowDom:false}, import.meta.url);
 
-        this.dados = null;
+        this.state = null;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, (evento) => {
 
-            //O evento também borbulha (bubbles+composed) a partir de qualquer componente carregado
+            //O evento também borbulha (bubbles+composed) a partir de qualquer componente loaded
             //dentro de #containerComponente (ex: visualizador-toque). Sem essa checagem, cada carregamento
             //do componente filho reentra aqui e chama carregarComponente() de novo, que anexa outra
             //instância do componente, que dispara outro evento, num loop sem fim.
@@ -24,11 +24,11 @@ export class Elemento extends ComponenteBase {
                 return;
             }
 
-            this.containerComponente = super.no_raiz.querySelector("#containerComponente");
-            this.containerConfiguracao = super.no_raiz.querySelector("#containerConfiguracao");
+            this.containerComponente = super.rootNode.querySelector("#containerComponente");
+            this.containerConfiguracao = super.rootNode.querySelector("#containerConfiguracao");
             
             //Estilos da configuração
-            super.no_raiz.querySelector("#voltar").style.display = "none";
+            super.rootNode.querySelector("#voltar").style.display = "none";
             this.containerComponente.style.display = "flex";
             this.containerConfiguracao.style.display = "none";
 
@@ -39,7 +39,7 @@ export class Elemento extends ComponenteBase {
             //então os ícones equivalentes daqui (que só fazem sentido no treemap, sem chrome de janela) ficam redundantes
             if (this.tagName.toLowerCase() === 'elemento-janela'){
                 ['minimizar', 'restaurar', 'maximizar', 'fechar'].forEach(id => {
-                    const icone = super.no_raiz.querySelector(`#${id}`);
+                    const icone = super.rootNode.querySelector(`#${id}`);
                     if (icone) icone.parentElement.style.display = 'none';
                 });
             }
@@ -50,7 +50,7 @@ export class Elemento extends ComponenteBase {
 
             }else{
 
-                this.renderizar(); 
+                this.render(); 
             }                    
         });
     }
@@ -62,14 +62,14 @@ export class Elemento extends ComponenteBase {
         //Altera visibilidade do compomente principal e da tela de configuração
         this.containerComponente.style.display = (abrir ? "none" : "flex");
         this.containerConfiguracao.style.display = (abrir ? "flex" : "none");
-        super.no_raiz.querySelector("#voltar").style.display = (abrir ? "block" : "none");
-        super.no_raiz.querySelector("#configuracao").style.display = (abrir ? "none" : "block"); 
+        super.rootNode.querySelector("#voltar").style.display = (abrir ? "block" : "none");
+        super.rootNode.querySelector("#configuracao").style.display = (abrir ? "none" : "block"); 
 
         if (abrir){            
 
             if (this.carregouComponentesConfiguracao){
 
-                this.renderizar();
+                this.render();
 
             }else{
 
@@ -78,20 +78,20 @@ export class Elemento extends ComponenteBase {
                 //let url_editor_json = super.prefixoEndereco + "/componentes/dados/json/editor/editor_json.js";                
                 //import(url_editor_json).then(modulo => {
                     
-                this.editorDados = super.no_raiz.querySelector("#editorDados");
+                this.editorDados = super.rootNode.querySelector("#editorDados");
 
                 this.editorDados.addEventListener("change", evento => {
 
                     //Intercepta o evento change do editor de dados
                     evento.stopPropagation();
 
-                    this.dados = evento.detail;
+                    this.state = evento.detail;
                     this.enviarEventoAtualizacaoElemento();    
                 });
 
                 this.montarSelectComponente();
                 this.carregouComponentesConfiguracao = true;
-                this.renderizar();                   
+                this.render();                   
 
 
 
@@ -111,7 +111,7 @@ export class Elemento extends ComponenteBase {
             
             this.componentes = componentes;
 
-            let select = super.no_raiz.querySelector("#selectComponente");
+            let select = super.rootNode.querySelector("#selectComponente");
             select.innerHTML = "";
 
             this.componentes.forEach(componente => {
@@ -136,7 +136,7 @@ export class Elemento extends ComponenteBase {
 
             function eventoSelecionouComponente(evento){           
                 evento.stopPropagation();
-                this.componente = this.componentes.find(c => c.nome == this.no_raiz.querySelector("#selectComponente").value);
+                this.componente = this.componentes.find(c => c.nome == this.rootNode.querySelector("#selectComponente").value);
                 
                 this.elemento_visualizacao.componente = this.componente.nome;
 
@@ -156,7 +156,7 @@ export class Elemento extends ComponenteBase {
             uuid_elemento:this.elemento.uuid,
             uuid_visualizacao:this._uuid_visualizacao,
             uuid_elemento_visualizacao:this._uuid,
-            dados:structuredClone(this.dados)
+            dados:structuredClone(this.state)
         });    
 
         this.dispatchEvent(eventoCompleto);  
@@ -188,21 +188,21 @@ export class Elemento extends ComponenteBase {
         if (nomeAtributo.localeCompare("uuid_elemento_visualizacao") == 0){
 
             this._uuid = novoValor;
-            this.renderizar();
+            this.render();
 
 
         }else if (nomeAtributo.localeCompare("uuid_visualizacao") == 0){
 
             this._uuid_visualizacao = novoValor;
-            this.renderizar();
+            this.render();
         }
     }
 
     atualizar(){
-        this.renderizar();
+        this.render();
     }
 
-    renderizar(){
+    render(){
 
         //Se possui o id do elemento e da visualizacao
         if (this._uuid && this._uuid_visualizacao){
@@ -245,17 +245,17 @@ export class Elemento extends ComponenteBase {
 
     atualizarComponenteEEditor(){
         if (this.instanciaComponente &&  this.elemento){  
-            if (this.elemento.dados){  
-                if (this.instanciaComponente.getAttribute("dados") != JSON.stringify(this.elemento.dados)){                    
-                    this.instanciaComponente.setAttribute("dados", JSON.stringify(this.elemento.dados));            
+            if (this.elemento.state){  
+                if (this.instanciaComponente.getAttribute("dados") != JSON.stringify(this.elemento.state)){                    
+                    this.instanciaComponente.setAttribute("dados", JSON.stringify(this.elemento.state));            
                 }
             }
         }
 
         if (this.editorDados && this.elemento){
-            if (this.elemento.dados){                     
-                if (this.editorDados.getAttribute("dados") != JSON.stringify(this.elemento.dados)){                         
-                    this.editorDados.setAttribute("dados", JSON.stringify(this.elemento.dados));
+            if (this.elemento.state){                     
+                if (this.editorDados.getAttribute("dados") != JSON.stringify(this.elemento.state)){                         
+                    this.editorDados.setAttribute("dados", JSON.stringify(this.elemento.state));
                 }
             }
         }
@@ -265,7 +265,7 @@ export class Elemento extends ComponenteBase {
 
     carregarComponente(){
 
-        if (super.carregado){
+        if (super.loaded){
 
             this.carregandoComponente = true;
       
@@ -273,18 +273,18 @@ export class Elemento extends ComponenteBase {
             //O diretório raiz é calculado partindo-se de está esta classe Elemento
             //Este arquivo deve estar em componentes/espaco/visualizacao/elemento.js
             //Está a quatro níveis da raiz de onde está hospedado
-            let url_raiz_ultima =  new URL("../../../",ComponenteBase.extrairCaminhoURL(import.meta.url));
+            let url_raiz_ultima =  new URL("../../../",ComponentBase.extrairCaminhoURL(import.meta.url));
 
             //Carrega dinamicamente o componente
-            import(ComponenteBase.resolverEndereco(this.componente.url, url_raiz_ultima.href)).then(modulo => {
+            import(ComponentBase.resolverEndereco(this.componente.url, url_raiz_ultima.href)).then(modulo => {
                 
-                //modulo não é usado mas está carregado em memória pelo último import
-                //podemos pegar informações do módulo do componente que que foi carregado
+                //modulo não é usado mas está loaded em memória pelo último import
+                //podemos pegar informações do módulo do componente que que foi loaded
                 //podemos agora referencia-lo pelo nome e cria uma instância
                 this.instanciaComponente = document.createElement(this.componente.nome);
 
-                //Nossa classe Elemento exibe esse componente que foi carregado dinamicamente
-                super.no_raiz.querySelector("#containerComponente").appendChild(this.instanciaComponente);
+                //Nossa classe Elemento exibe esse componente que foi loaded dinamicamente
+                super.rootNode.querySelector("#containerComponente").appendChild(this.instanciaComponente);
 
 
                 this.instanciaComponente.classList.add('componente');            
@@ -296,7 +296,7 @@ export class Elemento extends ComponenteBase {
                     //Para a propagaçaõ do evento do componente
                     evento.stopPropagation();
                 
-                    this.dados = evento.detail;
+                    this.state = evento.detail;
 
                     this.enviarEventoAtualizacaoElemento();               
                 });
@@ -311,7 +311,7 @@ export class Elemento extends ComponenteBase {
                 });
                 
                 this.carregandoComponente = false;
-                this.renderizar();
+                this.render();
             });
         }
     }
@@ -321,62 +321,62 @@ export class Elemento extends ComponenteBase {
     adicionarComportamentoBotoesElementoTreemap(){
 
         //Ir para a configuração do Elemento diz respeito somente a ele
-        super.no_raiz.querySelector("#configuracao").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#configuracao").addEventListener("click", ()=>{
             this.configuracao(true);
         });
-        super.no_raiz.querySelector("#voltar").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#voltar").addEventListener("click", ()=>{
             this.configuracao(false);
         });
 
 
 
         //Já as funções que modificam o elemento no espaço de elementos onde ele está inserido são enviadas para frente como um Evento
-        super.no_raiz.querySelector("#aumentar").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#aumentar").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_AUMENTAR_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});            
         });
 
-        super.no_raiz.querySelector("#diminuir").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#diminuir").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_DIMINUIR_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});            
         });
 
-        super.no_raiz.querySelector("#irParaTras").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#irParaTras").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_IR_PARA_TRAS_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});             
         });
 
-        super.no_raiz.querySelector("#irParaFrente").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#irParaFrente").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_IR_PARA_FRENTE_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});            
         });
 
-        super.no_raiz.querySelector("#irParaInicio").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#irParaInicio").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_IR_PARA_INICIO_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});            
         });
 
-        super.no_raiz.querySelector("#irParaFim").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#irParaFim").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_IR_PARA_FIM_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});              
         });
 
-        super.no_raiz.querySelector("#maximizar").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#maximizar").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_MAXIMIZAR_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid}); 
         });
 
-        super.no_raiz.querySelector("#restaurar").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#restaurar").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_RESTAURAR_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});
         });
 
-        super.no_raiz.querySelector("#minimizar").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#minimizar").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_MINIMIZAR_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});
         });
 
-        super.no_raiz.querySelector("#fechar").addEventListener("click", ()=>{
+        super.rootNode.querySelector("#fechar").addEventListener("click", ()=>{
             Evento.dispararEventoExecutarAcao(this, 
                 Evento.ACAO_FECHAR_ELEMENTO.nome, {"uuid_elemento_visualizacao":this._uuid});
         });                    

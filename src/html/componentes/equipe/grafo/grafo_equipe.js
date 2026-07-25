@@ -1,14 +1,14 @@
-import { ComponenteBase } from '../../componente_base.js';
+import { ComponentBase } from '../../component_base.js';
 import { Evento } from '../../espaco/evento.js';
 
 
-export class GrafoEquipe extends ComponenteBase {
+export class GrafoEquipe extends ComponentBase {
     
 
     constructor(){
-        super({templateURL:"./grafo_equipe.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./grafo_equipe.html", shadowDom:true}, import.meta.url);
         
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
         
             //TODO: carregar dinamicamente o vis.js
             //Importa dinamicamente a biblioteca JSONEditor
@@ -39,13 +39,13 @@ export class GrafoEquipe extends ComponenteBase {
                 fetch(this.url)
                     .then(retorno => retorno.json())
                     .then(json => {
-                        this.dados = json;
+                        this.state = json;
                         this.gerarGrafoEquipe();
                     })
                     .catch (e => alert (e));
 
             }else{
-                this.dados = dados;
+                this.state = dados;
                 this.gerarGrafoEquipe();
             }
         }
@@ -54,13 +54,13 @@ export class GrafoEquipe extends ComponenteBase {
 
    gerarGrafoEquipe (){
 
-        if (this.vis && this.dados){
+        if (this.vis && this.state){
             
-            let titulo = `Escala AlfVCP ${this.dados.mes} de ${this.dados.ano}`;
-            super.no_raiz.querySelector("#titulo").textContent = titulo;
+            let titulo = `Escala AlfVCP ${this.state.mes} de ${this.state.ano}`;
+            super.rootNode.querySelector("#titulo").textContent = titulo;
 
             this.idGrafo = 0;
-            let elementosGrafo = this.transformarListaEmGrafo([this.dados], this.idGrafo++, 70);
+            let elementosGrafo = this.transformarListaEmGrafo([this.state], this.idGrafo++, 70);
 
             let options = {
                 physics: {
@@ -68,7 +68,7 @@ export class GrafoEquipe extends ComponenteBase {
                   }
             };
             this.elementosGrafo = elementosGrafo;
-            let grafo = new vis.Network (super.no_raiz.querySelector("#divGrafo"), this.elementosGrafo, options);            
+            let grafo = new vis.Network (super.rootNode.querySelector("#divGrafo"), this.elementosGrafo, options);            
 
             grafo.on ("click", parametros => {
                 console.dir(parametros);

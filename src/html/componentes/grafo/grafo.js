@@ -66,5 +66,5 @@ export function carregar(network) {
         });
     }, 100);
 
-    alert("Grafo carregado com sucesso!");
+    alert("Grafo loaded com sucesso!");
 }

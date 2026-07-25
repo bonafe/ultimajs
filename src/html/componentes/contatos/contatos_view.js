@@ -1,11 +1,11 @@
-import { ComponenteBase } from '../componente_base.js';
+import { ComponentBase } from '../component_base.js';
 
-export class ContatosView extends ComponenteBase {
+export class ContatosView extends ComponentBase {
 
     constructor(){
-        super({templateURL:"./contatos_view.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./contatos_view.html", shadowDom:true}, import.meta.url);
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {                               
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {                               
         });
     }
 }

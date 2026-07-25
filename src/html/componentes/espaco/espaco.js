@@ -1,4 +1,4 @@
-import { ComponenteBase } from "../componente_base.js";
+import { ComponentBase } from "../component_base.js";
 import { Evento } from "./evento.js";
 import { EscritorEspacoDB } from "./modelo/escritor_espaco_db.js";
 import { LeitorEspacoDB } from "./modelo/leitor_espaco_db.js";
@@ -10,7 +10,7 @@ import { VisualizacaoJanelas } from "./visualizacao/janela/visualizacao_janelas.
 /**
  * Representa um espaço de trabalho do Ultima 
  */
-export class Espaco extends ComponenteBase{    
+export class Espaco extends ComponentBase{    
 
 
     static VISUALIZACOES_DISPONIVEIS = ["visualizacao-janelas", "visualizacao-treemap"];
@@ -23,7 +23,7 @@ export class Espaco extends ComponenteBase{
      */
     constructor(){
         
-        super({templateURL:"./espaco.html", shadowDOM:true}, import.meta.url);        
+        super({templateUrl:"./espaco.html", shadowDom:true}, import.meta.url);        
 
         this.renderizado = false;
 
@@ -35,14 +35,14 @@ export class Espaco extends ComponenteBase{
         this.visualizacao = undefined;
 
         //BUG: o nome do evento era a string 'carregou', mas o evento real disparado por
-        //ComponenteBase é EVENTO_CARREGOU ("carregou_componente") — esse listener nunca disparava.
+        //ComponentBase é LOADED_EVENT ("component-loaded") — esse listener nunca disparava.
         //Sem ele, carregarConfiguracao() só era chamado por attributeChangedCallback('src', ...), que
         //corre em paralelo com o carregamento do próprio template do Espaco: se o fetch da config +
-        //leitura do IndexedDB terminarem antes do template (super.carregado ainda false),
-        //this.renderizar() silenciosamente não faz nada e nada mais tenta de novo depois — a página
+        //leitura do IndexedDB terminarem antes do template (super.loaded ainda false),
+        //this.render() silenciosamente não faz nada e nada mais tenta de novo depois — a página
         //fica em branco (mas com os dados intactos no banco). Corrigido para o nome certo do evento,
         //com checagem de target porque o evento também borbulha de qualquer descendente.
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, (evento) => {
 
             if (evento.target !== this){
                 return;
@@ -78,13 +78,13 @@ export class Espaco extends ComponenteBase{
 
                 //Uma das condições para renderização é que as configurações estejam carregadas
                 this.configuracoesCarregadas = true;        
-                this.renderizar();
+                this.render();
 
 
             //Caso não existam visualizacoes na base [1ª Vez]
             }else{
 
-                //Caso um arquivo de configuração tenha sido carregado via attributeChangedCallback,
+                //Caso um arquivo de configuração tenha sido loaded via attributeChangedCallback,
                 //deve utilizar as configurações desse arquivo
                 if (this.configuracao){
 
@@ -110,7 +110,7 @@ export class Espaco extends ComponenteBase{
 
                         this.configuracoesCarregadas = true;
 
-                        this.renderizar();
+                        this.render();
                     });
 
                 
@@ -150,13 +150,13 @@ export class Espaco extends ComponenteBase{
 
 
 
-    renderizar(){
+    render(){
 
-        //TODO: Deve alterar a exibição caso um novo arquivo seja carregado
-        if (super.carregado && this.configuracoesCarregadas && !this.renderizado){
+        //TODO: Deve alterar a exibição caso um novo arquivo seja loaded
+        if (super.loaded && this.configuracoesCarregadas && !this.renderizado){
 
             //Marca ANTES do trabalho assíncrono: carregarConfiguracao() agora pode ser chamado duas
-            //vezes de forma legítima (attributeChangedCallback + EVENTO_CARREGOU), e se this.renderizado
+            //vezes de forma legítima (attributeChangedCallback + LOADED_EVENT), e se this.renderizado
             //só virasse true no final, as duas chamadas concorrentes passavam pela guarda acima antes de
             //qualquer uma terminar, duplicando os listeners de clique do cabeçalho (fullscreen,
             //configuração, ajuda, mudar visualização) — um clique real disparava a ação duas vezes.
@@ -179,19 +179,19 @@ export class Espaco extends ComponenteBase{
 
 
     criarAcoes(){
-        super.no_raiz.querySelector("#fullscreen").addEventListener("click", () => {
+        super.rootNode.querySelector("#fullscreen").addEventListener("click", () => {
             window.openFullscreen();
         });
     
-        super.no_raiz.querySelector("#configuracao").addEventListener("click", () => {
+        super.rootNode.querySelector("#configuracao").addEventListener("click", () => {
           this.configuracao();
         });
     
-        super.no_raiz.querySelector("#ajuda").addEventListener("click", () => {
+        super.rootNode.querySelector("#ajuda").addEventListener("click", () => {
           alert (`Última Versão: ${EspacoDB.VERSAO}`);
         });
     
-        super.no_raiz.querySelector("#mudarVisualizacao").addEventListener("click", () => {
+        super.rootNode.querySelector("#mudarVisualizacao").addEventListener("click", () => {
           this.mudarVisualizacao();
         });
     }
@@ -220,10 +220,10 @@ export class Espaco extends ComponenteBase{
 
                             //Componentes com URL Relativa são carregados a partir do diretório raiz do Ultima
                             //O diretório raiz é calculado partindo-se de está esta classe UltimaElemento
-                            let url_raiz_ultima =  new URL("../../",ComponenteBase.extrairCaminhoURL(import.meta.url));
+                            let url_raiz_ultima =  new URL("../../",ComponentBase.extrairCaminhoURL(import.meta.url));
 
                             //Carrega dinamicamente o modulo do componente do controlador
-                            import(ComponenteBase.resolverEndereco(controlador.url, url_raiz_ultima.href)).then(modulo => {
+                            import(ComponentBase.resolverEndereco(controlador.url, url_raiz_ultima.href)).then(modulo => {
 
                                 //Cria uma nova instância desse componente
                                 controlador.instanciaControlador = new modulo[controlador.nome_classe]();                                                    
@@ -248,7 +248,7 @@ export class Espaco extends ComponenteBase{
             this.visualizacao.remover();            
         }
 
-        let containerVisualizacao = super.no_raiz.querySelector(".secao_principal_ultima");
+        let containerVisualizacao = super.rootNode.querySelector(".secao_principal_ultima");
 
         //Cria um novo HTMLElement baseado no indice da visualizacao selecionada
         this.visualizacao = document.createElement(
@@ -360,7 +360,7 @@ export class Espaco extends ComponenteBase{
     gerarCaminhoAbsolutoURL(lista){
         return lista.map(elemento => {
             if (elemento.url){
-                elemento.url = ComponenteBase.resolverEndereco(elemento.url, ComponenteBase.extrairCaminhoURL(this._src)).href;
+                elemento.url = ComponentBase.resolverEndereco(elemento.url, ComponentBase.extrairCaminhoURL(this._src)).href;
             }
             return elemento;
         })
@@ -455,7 +455,7 @@ export class Espaco extends ComponenteBase{
                 LeitorEspacoDB.getInstance().elemento(elementoVisualizacaoAtualizado.uuid_elemento).then (elementoBanco => {
 
                     //Atualizar o elemento significa atualizar seus dados
-                    elementoBanco.dados = elementoVisualizacaoAtualizado.dados;
+                    elementoBanco.state = elementoVisualizacaoAtualizado.state;
                     
                     EscritorEspacoDB.getInstance().atualizarElemento(elementoBanco).then(()=>{
 
@@ -465,7 +465,7 @@ export class Espaco extends ComponenteBase{
                             uuid_elemento: elementoVisualizacaoAtualizado.uuid_elemento, //O elemento que foi atualizado
                             uuid_visualizacao: elementoVisualizacaoAtualizado.uuid_visualizacao, //A visualizacao que disparou a atualizado do elemento
                             uuid_elemento_visualizacao: elementoVisualizacaoAtualizado.uuid_elemento_visualizacao, //O id desse elemento na visualizacao (a visualizacao pode exibir vários vezes o mesmo elemento)
-                            dados:{...elementoBanco.dados} //Clona os dados para não serem alterados
+                            dados:{...elementoBanco.state} //Clona os dados para não serem alterados
                         });    
                                         
                         this.dispatchEvent(eventoElementoAtualizado);
@@ -490,7 +490,7 @@ export class Espaco extends ComponenteBase{
         let novo_elemento = {                        
             "uuid": window.crypto.randomUUID(),
             "nome": configuracoes_elemento.nome_elemento,            
-            "dados": configuracoes_elemento.dados
+            "dados": configuracoes_elemento.state
         };        
 
 
@@ -570,7 +570,7 @@ export class Espaco extends ComponenteBase{
 
     atualizarConfiguracao(elementoConfiguracao){
         
-        elementoConfiguracao.dados.visualizacao.elementos.forEach(elemento_configuracao => {
+        elementoConfiguracao.state.visualizacao.elementos.forEach(elemento_configuracao => {
 
             let elemento_atualizado = {...elemento_configuracao};
 

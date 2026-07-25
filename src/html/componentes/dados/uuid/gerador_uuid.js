@@ -1,40 +1,40 @@
-import { ComponenteBase } from '../../componente_base.js';
+import { ComponentBase } from '../../component_base.js';
 import { Evento } from '../../espaco/evento.js';
 
 
 
-export class GeradorUUID extends ComponenteBase {
+export class GeradorUUID extends ComponentBase {
 
 
 
     constructor(){
-        super({templateURL:"./gerador_uuid.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./gerador_uuid.html", shadowDom:true}, import.meta.url);
 
         this._dados = undefined;
 
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {          
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {          
 
-            this.uuids = super.no_raiz.querySelector("#uuids");
+            this.uuids = super.rootNode.querySelector("#uuids");
 
-            super.no_raiz.querySelector("#btnGerar").addEventListener("click", ()=> {
+            super.rootNode.querySelector("#btnGerar").addEventListener("click", ()=> {
                 this.gerarUUID();
             });
 
-            super.no_raiz.querySelector("#btnLimpar").addEventListener("click", ()=> {
+            super.rootNode.querySelector("#btnLimpar").addEventListener("click", ()=> {
                 this.limpar();
             });
 
-            this.renderizar();
+            this.render();
         });
     }
 
 
 
-    renderizar(){
-        if (this.uuids && super.carregado && this.dados){     
+    render(){
+        if (this.uuids && super.loaded && this.state){     
                         
-            this.uuids.textContent = this.dados;
+            this.uuids.textContent = this.state;
         }
     }
 
@@ -51,8 +51,8 @@ export class GeradorUUID extends ComponenteBase {
     
         if (nomeAtributo.localeCompare("dados") == 0){
 
-            this.dados = JSON.parse(novoValor);
-            this.renderizar();
+            this.state = JSON.parse(novoValor);
+            this.render();
         }
     }
 
@@ -62,7 +62,7 @@ export class GeradorUUID extends ComponenteBase {
         
         let uuid_gerado = window.crypto.randomUUID();        
         this.uuids.textContent = `${this.uuids.textContent}\n${uuid_gerado}`;
-        this.dados = this.uuids.textContent;
+        this.state = this.uuids.textContent;
         this.salvar();
     }
 
@@ -70,14 +70,14 @@ export class GeradorUUID extends ComponenteBase {
 
     limpar(){
         this.uuids.textContent = "";
-        this.dados = this.uuids.textContent;
+        this.state = this.uuids.textContent;
         this.salvar();
     }
 
 
 
     salvar(){
-        this.dispatchEvent(new CustomEvent("change", {detail:this.dados}));
+        this.dispatchEvent(new CustomEvent("change", {detail:this.state}));
     }
 }
 customElements.define('gerador-uuid', GeradorUUID);

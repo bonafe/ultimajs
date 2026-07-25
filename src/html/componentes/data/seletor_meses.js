@@ -1,26 +1,26 @@
-import { ComponenteBase } from '../componente_base.js';
+import { ComponentBase } from '../component_base.js';
 import { Evento } from '../espaco/evento.js';
 
 
-export class SeletorMeses extends ComponenteBase {
+export class SeletorMeses extends ComponentBase {
 
     
 
     constructor(){
-        super({templateURL:"./seletor_meses.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./seletor_meses.html", shadowDom:true}, import.meta.url);
         
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
         
-            this.renderizar();
+            this.render();
         });
     }
 
 
 
     selecionouMes(ano, mes, selecionado){
-        let registro = this.dados.find(r => (r.ano == ano) && (r.mes == mes));        
+        let registro = this.state.find(r => (r.ano == ano) && (r.mes == mes));        
         registro.selecionado = selecionado;
-        this.dispatchEvent(new CustomEvent("change", {detail:this.dados}));
+        this.dispatchEvent(new CustomEvent("change", {detail:this.state}));
         this.dispatchEvent(new Evento(Evento.EVENTO_SELECAO_OBJETO, registro));
     }
 
@@ -43,14 +43,14 @@ export class SeletorMeses extends ComponenteBase {
                 fetch(this.src)
                     .then(retorno => retorno.json())
                     .then(json => {
-                        this.dados = json;
-                        this.renderizar();
+                        this.state = json;
+                        this.render();
                     })
                     .catch (e => alert (e));
 
             }else{
-                this.dados = dados;
-                this.renderizar();
+                this.state = dados;
+                this.render();
             }
         }
     } 
@@ -81,13 +81,13 @@ export class SeletorMeses extends ComponenteBase {
 
 
 
-    renderizar (){
+    render (){
 
-        if (super.carregado && this.dados){ 
+        if (super.loaded && this.state){ 
             
             let agrupado_ano = {};
 
-            this.dados.forEach (dado => {
+            this.state.forEach (dado => {
                 if (!agrupado_ano[dado.ano]){
                     agrupado_ano[dado.ano] = [];
                 }
@@ -95,7 +95,7 @@ export class SeletorMeses extends ComponenteBase {
             });
 
 
-            let container = super.no_raiz.querySelector("#containerMeses");
+            let container = super.rootNode.querySelector("#containerMeses");
             container.innerHTML = "";
 
             let tabela = document.createElement("table");            

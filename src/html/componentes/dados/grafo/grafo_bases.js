@@ -1,27 +1,27 @@
-import { ComponenteBase } from '../../componente_base.js';
+import { ComponentBase } from '../../component_base.js';
 import { Evento } from '../../espaco/evento.js';
 
 
-export class GrafoBases extends ComponenteBase {
+export class GrafoBases extends ComponentBase {
     
 
     constructor(){
-        super({templateURL:"./grafo_bases.html", shadowDOM:true}, import.meta.url);
+        super({templateUrl:"./grafo_bases.html", shadowDom:true}, import.meta.url);
         
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {
         
             //TODO: carregar dinamicamente o vis.js
             //Importa dinamicamente a biblioteca JSONEditor
             //import(`${super.prefixoEndereco}/bibliotecas/vis.js/vis.js`).then(modulo => {
 
                 this.vis = true;
-                this.renderizar();                               
+                this.render();                               
             //});           
         });
     }
 
-    renderizar(){
-        if (this.vis && this.dados && !this.grafo && !this.gerandoGrafo){
+    render(){
+        if (this.vis && this.state && !this.grafo && !this.gerandoGrafo){
             this.gerarGrafo();
         }
     }
@@ -45,14 +45,14 @@ export class GrafoBases extends ComponenteBase {
                 fetch(this.src)
                     .then(retorno => retorno.json())
                     .then(json => {
-                        this.dados = json;
-                        this.renderizar();
+                        this.state = json;
+                        this.render();
                     })
                     .catch (e => alert (e));
 
             }else{
-                this.dados = dados;
-                this.renderizar();
+                this.state = dados;
+                this.render();
             }
         }
     } 
@@ -62,7 +62,7 @@ export class GrafoBases extends ComponenteBase {
 
         this.gerandoGrafo = true;
 
-        if (this.vis && this.dados){
+        if (this.vis && this.state){
 
 
             this.idGrafo = 0;
@@ -92,7 +92,7 @@ export class GrafoBases extends ComponenteBase {
               }
 
             this.elementosGrafo = elementosGrafo;
-            this.grafo = new vis.Network (super.no_raiz.querySelector("#divGrafo"), this.elementosGrafo, options);            
+            this.grafo = new vis.Network (super.rootNode.querySelector("#divGrafo"), this.elementosGrafo, options);            
 
             this.grafo.on ("click", parametros => {
                 console.dir(parametros);
@@ -126,7 +126,7 @@ export class GrafoBases extends ComponenteBase {
 
         let elementosGrafo = {nodes:new vis.DataSet(), edges:new vis.DataSet()};
 
-        Object.entries(this.dados.bases).forEach(entrada => {                    
+        Object.entries(this.state.bases).forEach(entrada => {                    
 
             let [nome_base, base] = entrada;            
 

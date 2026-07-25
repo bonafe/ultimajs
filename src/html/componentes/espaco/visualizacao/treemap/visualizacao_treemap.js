@@ -2,7 +2,7 @@ import { Visualizacao } from '../visualizacao.js';
 
 import { Evento } from '../../evento.js';
 
-import { ComponenteBase } from '../../../componente_base.js';
+import { ComponentBase } from '../../../component_base.js';
 
 import { ElementoTreemap } from './elemento_treemap.js';
 
@@ -19,26 +19,26 @@ export class VisualizacaoTreemap extends Visualizacao{
 
         this.cssCarregado = false;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
+        this.addEventListener(ComponentBase.LOADED_EVENT, (evento) => {
 
             //Idem visualizacao.js: ignora eventos borbulhados de descendentes que carregam depois.
             if (evento.target !== this){
                 return;
             }
 
-            this.container = super.no_raiz.querySelector(".componente_navegacao_visualizacao");
+            this.container = super.rootNode.querySelector(".componente_navegacao_visualizacao");
 
             this.carregarCSS("./visualizacao_treemap.css", import.meta.url)
                 .then(()=>{
                     this.cssCarregado = true;
-                    this.renderizar();
+                    this.render();
                 });
         });
     }
 
 
 
-    renderizar() {
+    render() {
 
         if (this.container && super.visualizacao && this.cssCarregado){
 
@@ -51,7 +51,7 @@ export class VisualizacaoTreemap extends Visualizacao{
                 this.atualizarTreeMap();
             }
         }
-        super.renderizar();
+        super.render();
     }
     
 
@@ -60,14 +60,14 @@ export class VisualizacaoTreemap extends Visualizacao{
 
         super.visualizacao.elementos.push({...elemento});
                                
-        this.renderizar();    
+        this.render();    
     }
 
 
 
     atualizarElemento(uuid_elemento){
         let seletor = `elemento-treemap[uuid_elemento="${uuid_elemento}"]`;
-        let elementos = super.no_raiz.querySelectorAll(seletor);
+        let elementos = super.rootNode.querySelectorAll(seletor);
         console.log (`ATUALIZANDO ELEMENTOS visualizacao COM O ELEMENTO PROCURADP: quantidade ${elementos.length}`);
         elementos.forEach(ultimaTreemapElemento => ultimaTreemapElemento.atualizar());        
     }
@@ -178,7 +178,7 @@ export class VisualizacaoTreemap extends Visualizacao{
         //nesse caso undefined precisa ser tratado como um retorno verdadeiro
         if (funcaoDeMudanca(elemento, indice) !== false){
         
-            this.renderizar();                  
+            this.render();                  
             this.dispatchEvent(new Evento(Evento.EVENTO_ATUALIZACAO_VISUALIZACAO,{uuid_visualizacao:this.visualizacao.uuid})); 
         }
     }

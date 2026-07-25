@@ -2,7 +2,7 @@ import { Visualizacao } from '../visualizacao.js';
 
 import { ElementoJanela } from './elemento_janela.js';
 import { Evento } from '../../evento.js';
-import { ComponenteBase } from '../../../componente_base.js';
+import { ComponentBase } from '../../../component_base.js';
 import { LeitorEspacoDB } from "../../modelo/leitor_espaco_db.js";
 
 
@@ -16,13 +16,13 @@ export class VisualizacaoJanelas extends Visualizacao{
 
         this.visualizacaoJanelaRenderizado = false;
 
-        this.addEventListener(ComponenteBase.EVENTO_CARREGOU, () => {            
+        this.addEventListener(ComponentBase.LOADED_EVENT, () => {            
 
             Promise.all([
                 super.carregarCSS("../../../../bibliotecas/jspanel/jspanel.css"),
                 super.carregarScript({src:"../../../../bibliotecas/jspanel/jspanel.js"})
             ]).then (() => {
-                this.container = super.no_raiz.querySelector(".componente_navegacao_visualizacao");
+                this.container = super.rootNode.querySelector(".componente_navegacao_visualizacao");
 
                 //Precisa escutar o evento no document
                 document.addEventListener("jspaneldragstop", evento => {
@@ -44,7 +44,7 @@ export class VisualizacaoJanelas extends Visualizacao{
                 }, false);
 
 
-                this.renderizar();
+                this.render();
             });                   
         });        
     }
@@ -75,7 +75,7 @@ export class VisualizacaoJanelas extends Visualizacao{
 
 
 
-    renderizar() {
+    render() {
 
         if (this.container && this._visualizacao && !this.visualizacaoJanelaRenderizado){
 
@@ -88,7 +88,7 @@ export class VisualizacaoJanelas extends Visualizacao{
 
             this.visualizacaoJanelaRenderizado = true;
         }
-        super.renderizar();
+        super.render();
     }
     
 
@@ -107,7 +107,7 @@ export class VisualizacaoJanelas extends Visualizacao{
 
         let seletor = `elemento-janela[uuid_elemento="${uuid_elemento}"]`;
         
-        let elementos = super.no_raiz.querySelectorAll(seletor);
+        let elementos = super.rootNode.querySelectorAll(seletor);
         
         console.log (`ATUALIZANDO ELEMENTOS visualizacao COM O ELEMENTO PROCURADP: quantidade ${elementos.length}`);
 
@@ -176,7 +176,7 @@ export class VisualizacaoJanelas extends Visualizacao{
         //nesse caso undefined precisa ser tratado como um retorno verdadeiro
         if (funcaoDeMudanca(elemento, indice) !== false){
         
-            this.renderizar();                  
+            this.render();                  
             this.dispatchEvent(new Evento(Evento.EVENTO_ATUALIZACAO_VISUALIZACAO,{uuid_visualizacao:this.visualizacao.uuid})); 
         }
     }
