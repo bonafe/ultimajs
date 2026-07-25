@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Alpine.js — implementação de benchmark</title>
+</head>
+<body>
+
+<div id="contador" x-data="{ count: 0 }">
+  <span class="valor" x-text="count"></span>
+</div>
+
+<div id="lista" x-data="{ linhas: [] }">
+  <table><tbody>
+    <template x-for="linha in linhas" :key="linha.id">
+      <tr>
+        <td class="coluna-id" x-text="linha.id"></td>
+        <td class="coluna-rotulo" x-text="linha.rotulo"></td>
+      </tr>
+    </template>
+  </tbody></table>
+</div>
+
+<div id="condicional" x-data="{ aberto: false }">
+  <template x-if="aberto"><div class="bloco-visivel">visível</div></template>
+  <template x-if="!aberto"><div class="bloco-oculto">oculto</div></template>
+</div>
+
+<div id="binding" x-data="{ texto: '' }">
+  <input class="campo" type="text" x-model="texto">
+  <span class="eco" x-text="texto"></span>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+  const ADJETIVOS = ['rápido', 'lento', 'grande', 'pequeno', 'azul', 'verde', 'vermelho', 'claro', 'escuro', 'novo'];
+  const SUBSTANTIVOS = ['carro', 'mesa', 'nuvem', 'rio', 'monte', 'vento', 'campo', 'porto', 'vale', 'lago'];
+  function rotuloAleatorio() {
+    const a = ADJETIVOS[Math.floor(Math.random() * ADJETIVOS.length)];
+    const s = SUBSTANTIVOS[Math.floor(Math.random() * SUBSTANTIVOS.length)];
+    return `${a} ${s}`;
+  }
+  let proximoId = 1;
+  let dContador, dLista, dCondicional, dBinding, campoBinding;
+
+  const pronto = new Promise(resolve => {
+    document.addEventListener('alpine:initialized', () => {
+      dContador = window.Alpine.$data(document.getElementById('contador'));
+      dLista = window.Alpine.$data(document.getElementById('lista'));
+      dCondicional = window.Alpine.$data(document.getElementById('condicional'));
+      dBinding = window.Alpine.$data(document.getElementById('binding'));
+      campoBinding = document.querySelector('#binding .campo');
+      resolve();
+    });
+  });
+
+  window.bench = {
+      pronto,
+      contador: {
+        reset: () => { dContador.count = 0; },
+        incrementar: (n) => { for (let i = 0; i < n; i++) { dContador.count++; } },
+        valorAtual: () => dContador.count
+      },
+      lista: {
+        criar: (n) => {
+          const linhas = [];
+          for (let i = 0; i < n; i++) {
+            linhas.push({ id: proximoId++, rotulo: rotuloAleatorio() });
+          }
+          dLista.linhas = linhas;
+        },
+        atualizarParcial: () => {
+          dLista.linhas = dLista.linhas.map((linha, indice) =>
+            indice % 10 === 0 ? { ...linha, rotulo: linha.rotulo + ' !!!' } : linha
+          );
+        },
+        trocar: () => {
+          const linhas = dLista.linhas.slice();
+          if (linhas.length > 998) {
+            [linhas[1], linhas[998]] = [linhas[998], linhas[1]];
+          } else if (linhas.length > 1) {
+            [linhas[0], linhas[linhas.length - 1]] = [linhas[linhas.length - 1], linhas[0]];
+          }
+          dLista.linhas = linhas;
+        },
+        remover: () => {
+          if (dLista.linhas.length === 0) { return; }
+          dLista.linhas = dLista.linhas.slice(1);
+        },
+        limpar: () => { dLista.linhas = []; },
+        contarLinhas: () => dLista.linhas.length
+      },
+      condicional: {
+        reset: () => { dCondicional.aberto = false; },
+        alternar: (n) => { for (let i = 0; i < n; i++) { dCondicional.aberto = !dCondicional.aberto; } },
+        estadoAtual: () => dCondicional.aberto
+      },
+      binding: {
+        reset: () => { dBinding.texto = ''; },
+        escrever: (n) => {
+          for (let i = 0; i < n; i++) {
+            campoBinding.value = `valor-${i}`;
+            campoBinding.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        },
+        valorAtual: () => dBinding.texto
+      }
+  };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmark — Ultima</title>
+<meta name="description" content="Benchmark reproduzível comparando Ultima com Litedom, Alpine.js, Lit, Minze e VanJS em quatro cenários: estado reativo, lista com chave, condicional e binding bidirecional.">
+<link rel="stylesheet" href="../assets/estilo.css">
+<link rel="stylesheet" href="./estilo.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="../index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="../index.html"><span class="rotulo-nav">Início</span></a>
+    <a href="../inicio-rapido.html"><span class="rotulo-nav">Documentação</span></a>
+    <a href="../exemplos.html"><span class="rotulo-nav">Exemplos</span></a>
+    <a href="./index.html" class="ativo"><span class="rotulo-nav">Benchmark</span></a>
+    <a href="../comparacao.html"><span class="rotulo-nav">Comparação</span></a>
+    <a href="../sobre.html"><span class="rotulo-nav">Sobre</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs layout-docs-largo">
+  <article class="conteudo-docs viz-root">
+    <h1>Benchmark</h1>
+    <p class="chapeu">
+      Comparação de desempenho entre o Ultima e cinco projetos próximos — Litedom, Alpine.js, Lit,
+      Minze e VanJS — em quatro cenários comuns de UI reativa. Roda inteiramente no seu navegador;
+      nenhum número aqui foi pré-calculado.
+    </p>
+
+    <div class="aviso">
+      <strong>Metodologia.</strong> Cada framework roda isolado num <code class="linha">&lt;iframe&gt;</code>
+      próprio, carregado via CDN oficial (exceto o Ultima, que usa o código local do repositório).
+      Cada operação é medida com <code class="linha">performance.now()</code> mais um duplo flush de
+      microtarefas depois (pra capturar atualizações que frameworks agendam via microtask, como o
+      agrupamento do Lit ou o <code class="linha">Alpine.nextTick</code>) — a medida não inclui o
+      repaint do navegador em si, propositalmente: <code class="linha">requestAnimationFrame</code>
+      é pausado pelo navegador em abas fora de foco, o que inviabilizaria rodar isso de forma
+      automatizada. Cada operação é repetida 5 vezes, e o valor reportado é a <strong>mediana</strong>
+      das 5. Os cenários de lista usam 1000 linhas; os de contador/condicional/binding fazem 1000
+      atualizações em sequência. Isso mede atualizações síncronas em lote, não 1000 interações reais
+      de usuário — frameworks que agrupam (<em>batch</em>) atualizações numa microtask tendem a se
+      sair melhor nesses cenários especificamente, o que reflete uma característica real da
+      arquitetura deles, não uma vantagem artificial. O VanJS não tem
+      reconciliação por chave (não existe esse conceito no framework — os nós DOM retornados por
+      <code class="linha">van.tags</code> já são os elementos reais); "trocar" e "remover" nesse caso
+      são implementados manipulando os nós diretamente, do jeito que a própria documentação recomenda.
+      O Minze não documenta reconciliação por chave nem binding bidirecional nativo; a implementação
+      de lista segue a orientação oficial de desempenho (evitar array reativo, chamar
+      <code class="linha">rerender()</code> manualmente) e a de binding é inferida (evento +
+      atualização manual). O Litedom não tem commits desde 2020 — os números ainda são reais, mas o
+      projeto pode não representar o estado da arte da própria abordagem.
+    </div>
+
+    <div class="controles-benchmark">
+      <button id="botao-rodar" class="botao botao-primario">Rodar benchmark</button>
+      <button id="botao-baixar" class="botao botao-secundario" disabled>Baixar resultados (JSON)</button>
+      <span id="status-benchmark" class="status-benchmark">Pronto pra rodar — leva cerca de 1 a 2 minutos.</span>
+    </div>
+
+    <pre id="log-execucao" class="log-execucao" hidden></pre>
+
+    <div class="legenda-frameworks" id="legenda-frameworks"></div>
+
+    <div class="grade-resultados" id="grade-resultados"></div>
+
+    <h2>Tabela completa</h2>
+    <div class="tabela-scroll">
+      <table id="tabela-resultados">
+        <thead>
+          <tr id="cabecalho-tabela"><th scope="col">Métrica</th></tr>
+        </thead>
+        <tbody id="corpo-tabela"></tbody>
+      </table>
+    </div>
+
+    <h2>Fontes</h2>
+    <ul>
+      <li>Metodologia inspirada na bateria de operações do
+        <a href="https://github.com/krausest/js-framework-benchmark" target="_blank" rel="noopener noreferrer">js-framework-benchmark</a>
+        (criar, atualização parcial, troca, remoção, limpeza), adaptada pros cenários próprios desta
+        comparação — não são os mesmos números nem a mesma metodologia exata daquele projeto.</li>
+      <li>Cada implementação usa a API pública documentada oficialmente de cada framework; onde a
+        documentação não confirma um recurso (reconciliação por chave no Minze/VanJS, binding
+        bidirecional no Minze), isso está declarado acima, não escondido nos números.</li>
+      <li>Código-fonte de cada implementação em
+        <code class="linha">benchmarks/implementacoes/</code> no repositório.</li>
+    </ul>
+
+  </article>
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="../sobre.html">Sobre</a>
+    <a href="../inicio-rapido.html">Documentação</a>
+  </div>
+  <div>Licença CC0 (domínio público) · Projeto pessoal, mantido desde 2020</div>
+</footer>
+
+<script type="module" src="./pagina.js"></script>
+
+</body>
+</html>

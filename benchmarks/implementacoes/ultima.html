@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Ultima — implementação de benchmark</title>
+</head>
+<body>
+
+<bench-contador id="contador"></bench-contador>
+<bench-lista id="lista"></bench-lista>
+<bench-condicional id="condicional"></bench-condicional>
+<bench-binding id="binding"></bench-binding>
+
+<script type="module">
+  import { ComponenteBase } from '../../src/html/componentes/componente_base.js';
+  import '../../src/html/componentes/benchmark/bench-contador/bench-contador.js';
+  import '../../src/html/componentes/benchmark/bench-lista/bench-lista.js';
+  import '../../src/html/componentes/benchmark/bench-condicional/bench-condicional.js';
+  import '../../src/html/componentes/benchmark/bench-binding/bench-binding.js';
+
+  const elContador = document.getElementById('contador');
+  const elLista = document.getElementById('lista');
+  const elCondicional = document.getElementById('condicional');
+  const elBinding = document.getElementById('binding');
+
+  function aoCarregar(elemento) {
+    if (elemento.carregado) {
+      return Promise.resolve();
+    }
+    return new Promise(resolve => {
+      elemento.addEventListener(ComponenteBase.EVENTO_CARREGOU, function ouvinte(evento) {
+        if (evento.composedPath()[0] !== elemento) {
+          return;
+        }
+        elemento.removeEventListener(ComponenteBase.EVENTO_CARREGOU, ouvinte);
+        resolve();
+      });
+    });
+  }
+
+  const pronto = Promise.all([
+    aoCarregar(elContador),
+    aoCarregar(elLista),
+    aoCarregar(elCondicional),
+    aoCarregar(elBinding)
+  ]).then(() => {});
+
+  window.bench = {
+    pronto,
+    contador: {
+      reset: () => elContador.reset(),
+      incrementar: (n) => elContador.incrementarVezes(n),
+      valorAtual: () => elContador.valorAtual()
+    },
+    lista: {
+      criar: (n) => elLista.criar(n),
+      atualizarParcial: () => elLista.atualizarParcial(),
+      trocar: () => elLista.trocar(),
+      remover: () => elLista.remover(),
+      limpar: () => elLista.limpar(),
+      contarLinhas: () => elLista.contarLinhas()
+    },
+    condicional: {
+      reset: () => elCondicional.reset(),
+      alternar: (n) => elCondicional.alternarVezes(n),
+      estadoAtual: () => elCondicional.estadoAtual()
+    },
+    binding: {
+      reset: () => elBinding.reset(),
+      escrever: (n) => elBinding.escreverVezes(n),
+      valorAtual: () => elBinding.valorAtual()
+    }
+  };
+</script>
+
+</body>
+</html>

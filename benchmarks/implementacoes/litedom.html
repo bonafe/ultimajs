@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Litedom — implementação de benchmark</title>
+</head>
+<body>
+
+<bench-contador id="contador"></bench-contador>
+<bench-lista id="lista"></bench-lista>
+<bench-condicional id="condicional"></bench-condicional>
+<bench-binding id="binding"></bench-binding>
+
+<script type="module">
+  import Litedom from 'https://unpkg.com/litedom';
+
+  Litedom({
+    tagName: 'bench-contador',
+    template: `<span class="valor">{this.count}</span>`,
+    data: { count: 0 },
+    reset() { this.data.count = 0; },
+    incrementarVezes(n) {
+      for (let i = 0; i < n; i++) { this.data.count = this.data.count + 1; }
+    },
+    valorAtual() { return this.data.count; }
+  });
+
+  Litedom({
+    tagName: 'bench-condicional',
+    template: `
+      <span :if="this.aberto" class="bloco-visivel">visível</span>
+      <span :else class="bloco-oculto">oculto</span>
+    `,
+    data: { aberto: false },
+    reset() { this.data.aberto = false; },
+    alternarVezes(n) {
+      for (let i = 0; i < n; i++) { this.data.aberto = !this.data.aberto; }
+    },
+    estadoAtual() { return this.data.aberto; }
+  });
+
+  Litedom({
+    tagName: 'bench-binding',
+    template: `
+      <input class="campo" type="text" @bind="texto">
+      <span class="eco">{this.texto}</span>
+    `,
+    data: { texto: '' },
+    reset() { this.data.texto = ''; },
+    escreverVezes(n) {
+      const campo = document.querySelector('#binding .campo');
+      for (let i = 0; i < n; i++) {
+        campo.value = `valor-${i}`;
+        campo.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    },
+    valorAtual() { return this.data.texto; }
+  });
+
+  let proximoId = 1;
+  const ADJETIVOS = ['rápido', 'lento', 'grande', 'pequeno', 'azul', 'verde', 'vermelho', 'claro', 'escuro', 'novo'];
+  const SUBSTANTIVOS = ['carro', 'mesa', 'nuvem', 'rio', 'monte', 'vento', 'campo', 'porto', 'vale', 'lago'];
+  function rotuloAleatorio() {
+    const a = ADJETIVOS[Math.floor(Math.random() * ADJETIVOS.length)];
+    const s = SUBSTANTIVOS[Math.floor(Math.random() * SUBSTANTIVOS.length)];
+    return `${a} ${s}`;
+  }
+
+  Litedom({
+    tagName: 'bench-lista',
+    template: `
+      <table><tbody>
+        <tr :for="linha in this.linhas" :key="row-{linha.id}">
+          <td class="coluna-id">{linha.id}</td>
+          <td class="coluna-rotulo">{linha.rotulo}</td>
+        </tr>
+      </tbody></table>
+    `,
+    data: { linhas: [] },
+    criar(n) {
+      const linhas = [];
+      for (let i = 0; i < n; i++) {
+        linhas.push({ id: proximoId++, rotulo: rotuloAleatorio() });
+      }
+      this.data.linhas = linhas;
+    },
+    atualizarParcial() {
+      this.data.linhas = this.data.linhas.map((linha, indice) =>
+        indice % 10 === 0 ? { ...linha, rotulo: linha.rotulo + ' !!!' } : linha
+      );
+    },
+    trocar() {
+      const linhas = this.data.linhas.slice();
+      if (linhas.length > 998) {
+        [linhas[1], linhas[998]] = [linhas[998], linhas[1]];
+      } else if (linhas.length > 1) {
+        [linhas[0], linhas[linhas.length - 1]] = [linhas[linhas.length - 1], linhas[0]];
+      }
+      this.data.linhas = linhas;
+    },
+    remover() {
+      if (this.data.linhas.length === 0) { return; }
+      this.data.linhas = this.data.linhas.slice(1);
+    },
+    limpar() { this.data.linhas = []; },
+    contarLinhas() { return this.data.linhas.length; }
+  });
+
+  const elContador = document.getElementById('contador');
+  const elLista = document.getElementById('lista');
+  const elCondicional = document.getElementById('condicional');
+  const elBinding = document.getElementById('binding');
+
+  window.bench = {
+    pronto: Promise.resolve(),
+    contador: {
+      reset: () => elContador.reset(),
+      incrementar: (n) => elContador.incrementarVezes(n),
+      valorAtual: () => elContador.valorAtual()
+    },
+    lista: {
+      criar: (n) => elLista.criar(n),
+      atualizarParcial: () => elLista.atualizarParcial(),
+      trocar: () => elLista.trocar(),
+      remover: () => elLista.remover(),
+      limpar: () => elLista.limpar(),
+      contarLinhas: () => elLista.contarLinhas()
+    },
+    condicional: {
+      reset: () => elCondicional.reset(),
+      alternar: (n) => elCondicional.alternarVezes(n),
+      estadoAtual: () => elCondicional.estadoAtual()
+    },
+    binding: {
+      reset: () => elBinding.reset(),
+      escrever: (n) => elBinding.escreverVezes(n),
+      valorAtual: () => elBinding.valorAtual()
+    }
+  };
+</script>
+
+</body>
+</html>

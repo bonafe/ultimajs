@@ -1,0 +1,153 @@
+/* Estilos específicos da página de benchmark — complementa ../assets/estilo.css, reaproveitando
+   os tokens (--cinza-*, --acento, --borda-sutil etc.) já definidos lá. */
+
+.viz-root {
+    --serie-ultima:    #3987e5;
+    --serie-litedom:   #d95926;
+    --serie-alpine:    #199e70;
+    --serie-lit:       #c98500;
+    --serie-minze:     #d55181;
+    --serie-vanjs:     #008300;
+}
+
+.layout-docs-largo {
+    grid-template-columns: 1fr;
+    max-width: 900px;
+}
+
+.controles-benchmark {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 24px 0;
+}
+
+.status-benchmark {
+    color: var(--cinza-400);
+    font-size: 0.9rem;
+}
+
+.log-execucao {
+    background: var(--cinza-900);
+    border: var(--borda-sutil);
+    border-radius: var(--raio-borda);
+    padding: 14px 16px;
+    font-family: var(--fonte-mono);
+    font-size: 0.82rem;
+    color: var(--cinza-400);
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 16px 0 32px;
+    white-space: pre-wrap;
+}
+.log-execucao .linha-erro {
+    color: #e66767;
+}
+.log-execucao .linha-ok {
+    color: var(--branco-suave);
+}
+
+.legenda-frameworks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin: 4px 0 28px;
+    font-size: 0.85rem;
+    color: var(--cinza-400);
+}
+.legenda-frameworks .item-legenda {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+.legenda-frameworks .amostra-cor {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.grade-resultados {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 24px 0 40px;
+}
+
+.cartao-metrica {
+    background: var(--cinza-900);
+    border: var(--borda-sutil);
+    border-radius: var(--raio-borda);
+    padding: 18px 20px;
+}
+.cartao-metrica h3 {
+    margin: 0 0 4px;
+    font-size: 0.98rem;
+    color: var(--branco-suave);
+}
+.cartao-metrica .descricao-metrica {
+    margin: 0 0 14px;
+    font-size: 0.82rem;
+    color: var(--cinza-400);
+}
+
+.barra-item {
+    display: grid;
+    grid-template-columns: 88px 1fr 64px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 0.82rem;
+}
+.barra-item .rotulo-framework {
+    color: var(--cinza-400);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.barra-trilho {
+    background: var(--cinza-850);
+    border-radius: 4px;
+    height: 10px;
+    overflow: hidden;
+}
+.barra-preenchimento {
+    height: 100%;
+    border-radius: 4px;
+    min-width: 3px;
+    transition: width 0.3s ease;
+}
+.barra-item .valor-barra {
+    color: var(--branco-suave);
+    font-variant-numeric: tabular-nums;
+    font-family: var(--fonte-mono);
+    font-size: 0.8rem;
+}
+.barra-item.sem-dado .rotulo-framework,
+.barra-item.sem-dado .valor-barra {
+    color: var(--cinza-600);
+}
+
+.tabela-scroll {
+    overflow-x: auto;
+    margin: 16px 0 32px;
+}
+.tabela-scroll table {
+    min-width: 640px;
+}
+
+.badge-abandonado {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--cinza-400);
+    border: var(--borda-sutil);
+    border-radius: 999px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
