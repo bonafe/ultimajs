@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultima — Web Components reativos, 100% JavaScript nativo</title>
+<meta name="description" content="Um framework para construir Web Components reativos usando só APIs nativas do navegador — sem build, sem npm, sem dependências.">
+<link rel="stylesheet" href="./assets/estilo.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html" class="ativo"><span class="rotulo-nav">Início</span></a>
+    <a href="./inicio-rapido.html"><span class="rotulo-nav">Documentação</span></a>
+    <a href="./exemplos.html"><span class="rotulo-nav">Exemplos</span></a>
+    <a href="./sobre.html"><span class="rotulo-nav">Sobre</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero">
+    <span class="selo">Projeto de código aberto desde 2020</span>
+    <h1>Web Components reativos,<br>100% JavaScript nativo.</h1>
+    <p class="subtitulo">
+      Ultima é um framework para construir componentes reutilizáveis usando só o que o navegador já
+      sabe fazer — <code class="linha">Custom Elements</code>, <code class="linha">Shadow DOM</code> e
+      módulos ES nativos. Sem build, sem <code class="linha">npm install</code>, sem dependências
+      carregadas em runtime.
+    </p>
+    <div class="cta">
+      <a href="./inicio-rapido.html" class="botao botao-primario">Começar agora</a>
+      <a href="https://github.com/bonafe/ultima" class="botao botao-secundario" target="_blank" rel="noopener">Ver no GitHub</a>
+    </div>
+  </section>
+
+  <section class="secao">
+    <div class="bloco-codigo">
+      <div class="barra">
+        <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+        <span class="titulo-arquivo">contador.html</span>
+      </div>
+      <pre><code>&lt;<span class="tag">div</span> <span class="atr">data-mapa</span>=<span class="str">'{"textContent":"total"}'</span>&gt;&lt;/<span class="tag">div</span>&gt;
+&lt;<span class="tag">button</span> <span class="atr">onclick</span>=<span class="str">"this.getRootNode().host.incrementar()"</span>&gt;+1&lt;/<span class="tag">button</span>&gt;
+
+<span class="com">&lt;!-- sem build, sem framework rodando por baixo: é o navegador lendo o atributo --&gt;</span></code></pre>
+    </div>
+  </section>
+
+  <section class="secao">
+    <div class="secao-cabecalho">
+      <h2>Por que Vanilla JS</h2>
+      <p>A filosofia do projeto desde o início: código que roda nativamente no navegador é uma boa
+      prática, não uma limitação.</p>
+    </div>
+    <div class="grade-pilares">
+      <div class="pilar">
+        <div class="numero">01</div>
+        <h3>Zero dependências</h3>
+        <p>Nenhuma biblioteca é carregada de CDN em tempo de execução. O que roda é exatamente o
+        arquivo <code class="linha">.js</code> que você importa — sem bundler, sem passo de build,
+        sem <code class="linha">node_modules</code>.</p>
+      </div>
+      <div class="pilar">
+        <div class="numero">02</div>
+        <h3>Padrões da Web de verdade</h3>
+        <p>Componentes são <code class="linha">Custom Elements</code> reais, com
+        <code class="linha">Shadow DOM</code> opcional de verdade — não uma abstração por cima que
+        parece Web Components. Interopera com qualquer outro código HTML/CSS/JS.</p>
+      </div>
+      <div class="pilar">
+        <div class="numero">03</div>
+        <h3>Reatividade declarativa</h3>
+        <p>Binding de atributo, condicionais, listas com reconciliação por chave, propriedades
+        computadas e observadores — direto em atributos <code class="linha">data-*</code> no seu
+        HTML, sem sintaxe de template proprietária pra aprender.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao">
+    <div class="secao-cabecalho">
+      <h2>A sintaxe</h2>
+      <p>Um vislumbre do <a href="./referencia.html">vocabulário completo</a> — condicional,
+      lista com chave e binding nos dois sentidos, tudo no mesmo componente.</p>
+    </div>
+    <div class="bloco-codigo">
+      <div class="barra">
+        <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+        <span class="titulo-arquivo">lista-de-tarefas.html</span>
+      </div>
+      <pre><code>&lt;<span class="tag">input</span> <span class="atr">data-mapa</span>=<span class="str">'{"value":"novaTarefa"}'</span>&gt;
+
+&lt;<span class="tag">template</span> <span class="atr">data-se</span>=<span class="str">"tarefas.length"</span>&gt;
+  &lt;<span class="tag">ul</span>&gt;
+    &lt;<span class="tag">template</span> <span class="atr">data-lista</span>=<span class="str">"tarefa in tarefas : id"</span>&gt;
+      &lt;<span class="tag">li</span> <span class="atr">data-classe</span>=<span class="str">'{"feita":"tarefa.feita"}'</span>&gt;
+        &lt;<span class="tag">input</span> <span class="atr">type</span>=<span class="str">"checkbox"</span> <span class="atr">data-mapa</span>=<span class="str">'{"checked":"tarefa.feita"}'</span>&gt;
+        &lt;<span class="tag">span</span> <span class="atr">data-mapa</span>=<span class="str">'{"textContent":"tarefa.titulo"}'</span>&gt;&lt;/<span class="tag">span</span>&gt;
+      &lt;/<span class="tag">li</span>&gt;
+    &lt;/<span class="tag">template</span>&gt;
+  &lt;/<span class="tag">ul</span>&gt;
+&lt;/<span class="tag">template</span>&gt;
+&lt;<span class="tag">template</span> <span class="atr">data-senao</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Nenhuma tarefa ainda.&lt;/<span class="tag">p</span>&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
+    </div>
+  </section>
+
+  <section class="secao">
+    <div class="secao-cabecalho">
+      <h2>Onde ir a partir daqui</h2>
+    </div>
+    <div class="grade-pilares">
+      <div class="pilar">
+        <h3><a href="./inicio-rapido.html">Início rápido →</a></h3>
+        <p>Como incluir o Ultima num projeto e montar seu primeiro componente reativo, sem instalar
+        nada.</p>
+      </div>
+      <div class="pilar">
+        <h3><a href="./guia.html">Guia →</a></h3>
+        <p>Os conceitos centrais — <code class="linha">ComponenteBase</code> e
+        <code class="linha">ComponenteReativo</code>, ciclo de vida, escopo de dados.</p>
+      </div>
+      <div class="pilar">
+        <h3><a href="./referencia.html">Referência da DSL →</a></h3>
+        <p>Cada atributo de template, com sintaxe e exemplo — a vitrine completa do vocabulário
+        reativo.</p>
+      </div>
+      <div class="pilar">
+        <h3><a href="./exemplos.html">Exemplos →</a></h3>
+        <p>Um formulário reativo completo e o "Espaço" — a aplicação de referência do projeto, com
+        treemap e janelas.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./sobre.html">Sobre</a>
+    <a href="./inicio-rapido.html">Documentação</a>
+  </div>
+  <div>Licença CC0 (domínio público) · Projeto pessoal, mantido desde 2020</div>
+</footer>
+
+</body>
+</html>

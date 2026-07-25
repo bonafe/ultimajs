@@ -10,9 +10,9 @@ de passagem".
 Não faça uma varredura própria do repositório. O contexto já está escrito:
 
 1. `CLAUDE.md` (raiz do repo) — comandos, arquitetura geral.
-2. `docs/especificacao/02-arquitetura-nucleo.md` — a peça que te interessa: `ComponenteReativo`, o
+2. `documentacao-tecnica/especificacao/02-arquitetura-nucleo.md` — a peça que te interessa: `ComponenteReativo`, o
    pipeline de renderização reativa completo (escopo, condicionais, listas, binding bidirecional).
-3. `docs/especificacao/08-debito-tecnico-conhecido.md`, seção 8.8 — limitações arquiteturais já
+3. `documentacao-tecnica/especificacao/08-debito-tecnico-conhecido.md`, seção 8.8 — limitações arquiteturais já
    identificadas, incluindo a ausência de *keyed diffing* em listas.
 4. O código-fonte em si: `src/html/componentes/componente_reativo.js` (arquivo único, ~550 linhas).
 
@@ -108,5 +108,5 @@ testar-e-ajustar em si.
 - Não corrija os bugs listados na seção 8 da especificação a menos que estejam literalmente no seu
   caminho (ex: colidem com o código que você está mudando).
 - Ao final, se o item 1 (keyed diffing) exigir uma sintaxe nova (`:chave` ou equivalente), documente
-  essa sintaxe nova na seção 2.2.3 de `docs/especificacao/02-arquitetura-nucleo.md` — é a fonte da
+  essa sintaxe nova na seção 2.2.3 de `documentacao-tecnica/especificacao/02-arquitetura-nucleo.md` — é a fonte da
   verdade da DSL de template.

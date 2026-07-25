@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia — Ultima</title>
+<meta name="description" content="Os conceitos centrais do Ultima: ComponenteBase e ComponenteReativo, ciclo de vida, escopo de dados.">
+<link rel="stylesheet" href="./assets/estilo.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Início</span></a>
+    <a href="./inicio-rapido.html" class="ativo"><span class="rotulo-nav">Documentação</span></a>
+    <a href="./exemplos.html"><span class="rotulo-nav">Exemplos</span></a>
+    <a href="./sobre.html"><span class="rotulo-nav">Sobre</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs">
+
+  <aside class="sidebar-docs">
+    <div class="grupo">
+      <div class="titulo-grupo">Primeiros passos</div>
+      <a href="./inicio-rapido.html">Início rápido</a>
+      <a href="./guia.html" class="ativo">Guia</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Referência</div>
+      <a href="./referencia.html">DSL de template</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Prático</div>
+      <a href="./exemplos.html">Exemplos</a>
+    </div>
+  </aside>
+
+  <article class="conteudo-docs">
+    <h1>Guia</h1>
+    <p class="chapeu">
+      Todo componente do Ultima estende, direta ou indiretamente, <code class="linha">ComponenteBase</code>.
+      Componentes que precisam de binding de dados declarativo estendem
+      <code class="linha">ComponenteReativo</code>, que por sua vez estende
+      <code class="linha">ComponenteBase</code>.
+    </p>
+
+    <h2>ComponenteBase</h2>
+    <p>
+      Cuida do carregamento do template HTML externo, do isolamento opcional via Shadow DOM e da
+      resolução de caminhos relativos ao próprio módulo do componente (não à página que o usa).
+    </p>
+    <div class="bloco-codigo">
+      <pre><code><span class="tag">constructor</span>(propriedades, url_herdeiro)</code></pre>
+    </div>
+    <ul>
+      <li><code class="linha">propriedades.templateURL</code> — caminho do arquivo HTML do template, relativo ao módulo <code class="linha">.js</code>.</li>
+      <li><code class="linha">propriedades.shadowDOM</code> — <code class="linha">true</code> pra isolar em Shadow DOM (<code class="linha">mode:'open'</code>); <code class="linha">false</code> pra renderizar direto como filhos do próprio elemento.</li>
+      <li><code class="linha">url_herdeiro</code> — sempre <code class="linha">import.meta.url</code> da classe filha.</li>
+    </ul>
+
+    <h3>O evento de carregamento</h3>
+    <p>
+      <code class="linha">ComponenteBase.EVENTO_CARREGOU</code> ("<code class="linha">carregou_componente</code>")
+      é despachado quando o componente — e todos os seus descendentes que também são
+      <code class="linha">ComponenteBase</code> — terminam de montar. Ele borbulha
+      (<code class="linha">bubbles:true, composed:true</code>) e atravessa fronteiras de Shadow DOM.
+    </p>
+    <div class="aviso">
+      <strong>Use <code class="linha">evento.composedPath()[0]</code>, não
+      <code class="linha">evento.target</code>.</strong> Quando um componente descendente tem seu
+      próprio Shadow Root, o navegador faz <em>retargeting</em> do evento ao cruzar essa fronteira —
+      <code class="linha">evento.target</code> aparece como se fosse o próprio elemento que está
+      escutando, mesmo vindo de um descendente diferente. Sem essa checagem correta, um listener
+      pode reagir a carregamentos que não são o dele — na prática isso já causou loops de
+      re-renderização real neste projeto.
+    </div>
+    <div class="bloco-codigo">
+      <pre><code><span class="tag">this</span>.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) =&gt; {
+    <span class="tag">if</span> (evento.composedPath()[<span class="str">0</span>] !== <span class="tag">this</span>) {
+        <span class="tag">return</span>;
+    }
+    <span class="com">// aqui sim: o próprio componente terminou de carregar</span>
+});</code></pre>
+    </div>
+
+    <h2>ComponenteReativo</h2>
+    <p>
+      Adiciona reatividade declarativa via atributos <code class="linha">data-*</code> lidos do
+      template — a lista completa está na <a href="./referencia.html">Referência da DSL</a>. Aqui, os
+      conceitos por trás dela.
+    </p>
+
+    <h3>Dados</h3>
+    <div class="bloco-codigo">
+      <pre><code><span class="tag">get</span> dados()               <span class="com">// retorna os dados atuais</span>
+<span class="tag">set</span> dados(novosDados)     <span class="com">// grava e re-renderiza, se algo mudou</span></code></pre>
+    </div>
+    <p>
+      O atributo HTML <code class="linha">data-dados</code> também é observado — mudá-lo de fora
+      (<code class="linha">setAttribute</code>) tem o mesmo efeito que usar o setter
+      <code class="linha">dados</code>. Escritas que não mudam o conteúdo (comparadas por valor, não
+      por referência) são ignoradas — não disparam re-renderização nem eventos.
+    </p>
+
+    <h3>Propriedades computadas e observadores</h3>
+    <div class="bloco-codigo">
+      <pre><code>computadas()     <span class="com">// -&gt; Object, derivado de this.dados, somado a todo binding</span>
+observadores()   <span class="com">// -&gt; { "caminho": (novoValor, valorAntigo) =&gt; {...} }</span></code></pre>
+    </div>
+    <p>
+      Sobrescreva <code class="linha">computadas()</code> pra declarar valores derivados dos dados
+      brutos — o retorno fica disponível em qualquer binding (<code class="linha">data-mapa</code>,
+      <code class="linha">data-se</code>, <code class="linha">data-classe</code>,
+      <code class="linha">data-estilo</code>, <code class="linha">data-lista</code>) como se fosse um
+      dado normal. Sobrescreva <code class="linha">observadores()</code> pra reagir quando um caminho
+      específico muda de valor entre uma renderização e outra.
+    </p>
+
+    <h3>Escopo</h3>
+    <p>
+      Cada nível de aninhamento — a raiz do componente, um ramo condicional resolvido, um item de
+      lista — tem seu próprio escopo de dados. Dentro de um item de lista, o nome da variável do laço
+      fica disponível como se fosse um campo normal, e o que vem do escopo pai continua acessível
+      (o escopo encadeia por protótipo). Dois componentes reativos aninhados não compartilham escopo:
+      um filho recebe dados explicitamente via <code class="linha">data-mapa='{"data-dados":"caminho"}'</code>.
+    </p>
+
+    <h3>Reconciliação de listas</h3>
+    <p>
+      <code class="linha">data-lista</code> pode reconciliar por chave — quando o item tem um campo
+      de identidade estável (declarado ou inferido de <code class="linha">uuid</code>/<code class="linha">id</code>),
+      os nós DOM existentes são reaproveitados e movidos em vez de destruídos e recriados a cada
+      renderização, preservando foco, scroll e estado interno de componentes aninhados. Detalhes
+      completos e a sintaxe na <a href="./referencia.html">Referência</a>.
+    </p>
+
+    <div class="paginacao-docs">
+      <a href="./inicio-rapido.html">
+        <span>← Início rápido</span>
+      </a>
+      <a href="./referencia.html" class="proxima">
+        Próximo
+        <span>Referência da DSL →</span>
+      </a>
+    </div>
+  </article>
+
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./sobre.html">Sobre</a>
+    <a href="./inicio-rapido.html">Documentação</a>
+  </div>
+  <div>Licença CC0 (domínio público) · Projeto pessoal, mantido desde 2020</div>
+</footer>
+
+</body>
+</html>

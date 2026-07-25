@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Início Rápido — Ultima</title>
+<meta name="description" content="Como incluir o Ultima num projeto e montar seu primeiro componente reativo, sem instalar nada.">
+<link rel="stylesheet" href="./assets/estilo.css">
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Início</span></a>
+    <a href="./inicio-rapido.html" class="ativo"><span class="rotulo-nav">Documentação</span></a>
+    <a href="./exemplos.html"><span class="rotulo-nav">Exemplos</span></a>
+    <a href="./sobre.html"><span class="rotulo-nav">Sobre</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs">
+
+  <aside class="sidebar-docs">
+    <div class="grupo">
+      <div class="titulo-grupo">Primeiros passos</div>
+      <a href="./inicio-rapido.html" class="ativo">Início rápido</a>
+      <a href="./guia.html">Guia</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Referência</div>
+      <a href="./referencia.html">DSL de template</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Prático</div>
+      <a href="./exemplos.html">Exemplos</a>
+    </div>
+  </aside>
+
+  <article class="conteudo-docs">
+    <h1>Início rápido</h1>
+    <p class="chapeu">
+      Não existe pacote no npm nem CDN oficial ainda — o Ultima se usa incluindo os arquivos-fonte
+      diretamente, como módulos ES nativos. É assim que o próprio projeto se usa internamente.
+    </p>
+
+    <h2>1. Pegue os arquivos do núcleo</h2>
+    <p>
+      Copie (ou clone o repositório e referencie) os dois arquivos que formam o núcleo do framework:
+    </p>
+    <div class="bloco-codigo">
+      <pre><code>src/html/componentes/componente_base.js
+src/html/componentes/componente_reativo.js</code></pre>
+    </div>
+    <p>
+      Nenhum outro arquivo é obrigatório — o resto do repositório é a aplicação de referência
+      ("Espaço") construída em cima desses dois.
+    </p>
+
+    <h2>2. Crie o template e a classe do componente</h2>
+    <p>
+      Todo componente tem dois arquivos: um <code class="linha">.html</code> (o template) e um
+      <code class="linha">.js</code> (a classe, que estende <code class="linha">ComponenteReativo</code>
+      quando precisa de binding de dados, ou <code class="linha">ComponenteBase</code> quando não
+      precisa).
+    </p>
+
+    <div class="bloco-codigo">
+      <div class="barra">
+        <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+        <span class="titulo-arquivo">meu-contador.html</span>
+      </div>
+      <pre><code>&lt;<span class="tag">div</span>&gt;
+  Total: &lt;<span class="tag">span</span> <span class="atr">data-mapa</span>=<span class="str">'{"textContent":"total"}'</span>&gt;&lt;/<span class="tag">span</span>&gt;
+  &lt;<span class="tag">button</span> <span class="atr">id</span>=<span class="str">"incrementar"</span>&gt;+1&lt;/<span class="tag">button</span>&gt;
+&lt;/<span class="tag">div</span>&gt;</code></pre>
+    </div>
+
+    <div class="bloco-codigo">
+      <div class="barra">
+        <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+        <span class="titulo-arquivo">meu-contador.js</span>
+      </div>
+      <pre><code><span class="tag">import</span> { ComponenteReativo } <span class="tag">from</span> <span class="str">'./componente_reativo.js'</span>;
+
+<span class="tag">export</span> <span class="tag">class</span> MeuContador <span class="tag">extends</span> ComponenteReativo {
+
+    constructor() {
+        <span class="tag">super</span>(
+            { templateURL: <span class="str">'./meu-contador.html'</span>, shadowDOM: <span class="tag">true</span> },
+            import.meta.url
+        );
+
+        <span class="tag">this</span>.addEventListener(<span class="str">'carregou_componente'</span>, (evento) =&gt; {
+            <span class="com">// composedPath()[0], não evento.target — ver o Guia pra entender por quê</span>
+            <span class="tag">if</span> (evento.composedPath()[<span class="str">0</span>] !== <span class="tag">this</span>) <span class="tag">return</span>;
+
+            <span class="tag">this</span>.dados = { total: <span class="str">0</span> };
+
+            <span class="tag">this</span>.no_raiz.querySelector(<span class="str">'#incrementar'</span>)
+                .addEventListener(<span class="str">'click'</span>, () =&gt; {
+                    <span class="tag">this</span>.dados = { total: <span class="tag">this</span>.dados.total + <span class="str">1</span> };
+                });
+        });
+    }
+}
+
+customElements.define(<span class="str">'meu-contador'</span>, MeuContador);</code></pre>
+    </div>
+
+    <h2>3. Use o componente</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">script</span> <span class="atr">type</span>=<span class="str">"module"</span> <span class="atr">src</span>=<span class="str">"./meu-contador.js"</span>&gt;&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">meu-contador</span>&gt;&lt;/<span class="tag">meu-contador</span>&gt;</code></pre>
+    </div>
+
+    <div class="aviso">
+      <strong>Sem passo de build.</strong> Sirva os arquivos com qualquer servidor estático
+      (<code class="linha">python3 -m http.server</code>, por exemplo) e abra no navegador. Os
+      caminhos em <code class="linha">templateURL</code> são resolvidos relativos ao próprio arquivo
+      <code class="linha">.js</code> do componente (via <code class="linha">import.meta.url</code>),
+      não relativos à página — então componentes são independentes de onde são usados.
+    </div>
+
+    <div class="paginacao-docs">
+      <span></span>
+      <a href="./guia.html" class="proxima">
+        Próximo
+        <span>Guia →</span>
+      </a>
+    </div>
+  </article>
+
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./sobre.html">Sobre</a>
+    <a href="./inicio-rapido.html">Documentação</a>
+  </div>
+  <div>Licença CC0 (domínio público) · Projeto pessoal, mantido desde 2020</div>
+</footer>
+
+</body>
+</html>

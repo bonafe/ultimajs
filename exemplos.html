@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exemplos — Ultima</title>
+<meta name="description" content="Um formulário reativo completo e o Espaço, a aplicação de referência do projeto.">
+<link rel="stylesheet" href="./assets/estilo.css">
+<style>
+  .captura { width: 100%; border-radius: var(--raio-borda); border: var(--borda-sutil); box-shadow: var(--sombra-elevacao); margin: 20px 0 8px; }
+  .legenda { font-size: 0.85rem; color: var(--cinza-400); text-align: center; margin: 0 0 24px; }
+</style>
+</head>
+<body>
+
+<header class="cabecalho-site">
+  <a class="logo-site" href="./index.html">
+    <span class="marca">&lt;/&gt;</span> Ultima
+  </a>
+  <nav class="nav-site">
+    <a href="./index.html"><span class="rotulo-nav">Início</span></a>
+    <a href="./inicio-rapido.html"><span class="rotulo-nav">Documentação</span></a>
+    <a href="./exemplos.html" class="ativo"><span class="rotulo-nav">Exemplos</span></a>
+    <a href="./sobre.html"><span class="rotulo-nav">Sobre</span></a>
+    <a href="https://github.com/bonafe/ultima" class="botao-github" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<div class="layout-docs">
+
+  <aside class="sidebar-docs">
+    <div class="grupo">
+      <div class="titulo-grupo">Primeiros passos</div>
+      <a href="./inicio-rapido.html">Início rápido</a>
+      <a href="./guia.html">Guia</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Referência</div>
+      <a href="./referencia.html">DSL de template</a>
+    </div>
+    <div class="grupo">
+      <div class="titulo-grupo">Prático</div>
+      <a href="./exemplos.html" class="ativo">Exemplos</a>
+    </div>
+  </aside>
+
+  <article class="conteudo-docs">
+    <h1>Exemplos</h1>
+    <p class="chapeu">
+      Dois exemplos reais do repositório — um formulário pequeno que exercita toda a DSL de uma vez, e
+      a aplicação completa que o projeto usa como campo de prova desde o início.
+    </p>
+
+    <h2>Formulário com componentes aninhados</h2>
+    <p>
+      Em <code class="linha">src/html/componentes/z.exemplo/</code>: um componente
+      <code class="linha">br-teste</code> com todos os tipos de binding — texto, checkbox, cadeia
+      condicional de três ramos, e uma lista de endereços reconciliada por chave, onde cada item é
+      ele mesmo outro componente reativo (<code class="linha">br-endereco</code>) recebendo dados via
+      <code class="linha">data-mapa</code>.
+    </p>
+    <div class="bloco-codigo">
+      <div class="barra">
+        <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+        <span class="titulo-arquivo">br-teste.html (recorte)</span>
+      </div>
+      <pre><code>&lt;<span class="tag">template</span> <span class="atr">data-se</span>=<span class="str">"exibir_endereco"</span>&gt;
+  &lt;<span class="tag">div</span> <span class="atr">id</span>=<span class="str">"enderecos"</span>&gt;
+    &lt;<span class="tag">template</span> <span class="atr">data-lista</span>=<span class="str">"endereco, indice in enderecos : cep"</span>&gt;
+      &lt;<span class="tag">br-endereco</span> <span class="atr">data-mapa</span>=<span class="str">'{"data-dados":"endereco"}'</span>&gt;&lt;/<span class="tag">br-endereco</span>&gt;
+    &lt;/<span class="tag">template</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
+    </div>
+    <p>
+      <a href="https://github.com/bonafe/ultima/blob/master/src/html/componentes/z.exemplo/br-teste.html" target="_blank" rel="noopener">Ver o arquivo completo no GitHub →</a>
+    </p>
+
+    <h2>Espaço — a aplicação de referência</h2>
+    <p>
+      O Ultima começou em 2020 como um protótipo de visualização em treemap, e o "Espaço" continua
+      sendo a aplicação que valida o framework na prática: um ambiente onde você adiciona elementos —
+      vídeos, imagens, iframes, grafos, painéis de dados — e os organiza numa de duas visualizações
+      alternáveis, com todo o estado persistido no navegador via IndexedDB. Sem backend.
+    </p>
+
+    <img class="captura" src="./assets/captura-treemap.jpg" alt="Captura de tela do Espaço mostrando três elementos lado a lado num layout treemap: um painel azul de toque, um vídeo incorporado do YouTube e um grafo interativo do esquema do banco de dados local.">
+    <p class="legenda">O Espaço em execução: três elementos (toque, vídeo, grafo do próprio banco local) organizados automaticamente pelo layout de treemap.</p>
+
+    <p>
+      A segunda visualização organiza os mesmos elementos em janelas flutuantes, arrastáveis e
+      redimensionáveis — trocar entre as duas é uma ação do menu, sem perder dados.
+    </p>
+
+    <div class="aviso">
+      O Espaço não é só uma demo — é onde bugs reais do framework aparecem primeiro. A
+      <a href="./sobre.html">página Sobre</a> tem mais contexto sobre a origem do projeto.
+    </div>
+
+    <div class="paginacao-docs">
+      <a href="./referencia.html">
+        <span>← Referência da DSL</span>
+      </a>
+      <span></span>
+    </div>
+  </article>
+
+</div>
+
+<footer class="rodape-site">
+  <div class="links-rodape">
+    <a href="https://github.com/bonafe/ultima" target="_blank" rel="noopener">GitHub</a>
+    <a href="./sobre.html">Sobre</a>
+    <a href="./inicio-rapido.html">Documentação</a>
+  </div>
+  <div>Licença CC0 (domínio público) · Projeto pessoal, mantido desde 2020</div>
+</footer>
+
+</body>
+</html>
