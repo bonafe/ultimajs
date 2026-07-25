@@ -94,18 +94,18 @@ src/reactive_component.js</code></pre>
             { templateUrl: <span class="str">'./my-counter.html'</span>, shadowDom: <span class="tag">true</span> },
             import.meta.url
         );
+    }
 
-        <span class="tag">this</span>.addEventListener(<span class="str">'component-loaded'</span>, (event) =&gt; {
-            <span class="com">// composedPath()[0], not event.target — see the Guide for why</span>
-            <span class="tag">if</span> (event.composedPath()[<span class="str">0</span>] !== <span class="tag">this</span>) <span class="tag">return</span>;
+    <span class="com">// Called once this component (and any descendants) finish loading — see the Guide</span>
+    onLoad() {
+        <span class="tag">super</span>.onLoad();
 
-            <span class="tag">this</span>.state = { total: <span class="str">0</span> };
+        <span class="tag">this</span>.state = { total: <span class="str">0</span> };
 
-            <span class="tag">this</span>.rootNode.querySelector(<span class="str">'#increment'</span>)
-                .addEventListener(<span class="str">'click'</span>, () =&gt; {
-                    <span class="tag">this</span>.state = { total: <span class="tag">this</span>.state.total + <span class="str">1</span> };
-                });
-        });
+        <span class="tag">this</span>.rootNode.querySelector(<span class="str">'#increment'</span>)
+            .addEventListener(<span class="str">'click'</span>, () =&gt; {
+                <span class="tag">this</span>.state = { total: <span class="tag">this</span>.state.total + <span class="str">1</span> };
+            });
     }
 }
 

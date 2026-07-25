@@ -73,6 +73,43 @@ export class ComponentBase extends HTMLElement {
 
 
     /**
+     * Override to run initialization once this component (its own template plus every descendant
+     * ComponentBase) has finished loading — called directly at the exact point checkLoading()/
+     * checkIfAllChildrenLoaded() determine that, so subclasses get it for free without subscribing
+     * to LOADED_EVENT themselves and filtering it by composedPath()[0] (see whenLoaded() below for
+     * why that filtering is still needed for outside listeners). Subclasses that override this must
+     * call super.onLoad().
+     */
+    onLoad() {}
+
+    /**
+     * Promise-based equivalent of onLoad() for code outside the component's own class (e.g. the page
+     * that uses it), where overriding onLoad() isn't an option. Resolves immediately if already
+     * loaded; otherwise waits for this element's own LOADED_EVENT — filtering out the ones that
+     * bubble up from descendants via composedPath()[0], since event.target gets retargeted to this
+     * element when the descendant has its own Shadow Root.
+     * @returns {Promise<void>}
+     */
+    whenLoaded() {
+        if (this.#loaded) {
+            return Promise.resolve();
+        }
+
+        return new Promise(resolve => {
+            const listener = (event) => {
+                if (event.composedPath()[0] !== this) {
+                    return;
+                }
+                this.removeEventListener(ComponentBase.LOADED_EVENT, listener);
+                resolve();
+            };
+            this.addEventListener(ComponentBase.LOADED_EVENT, listener);
+        });
+    }
+
+
+
+    /**
      * Extracts the base path from a URL
      * @param {string} url - Full URL
      * @returns {string} Base path of the URL
@@ -254,6 +291,7 @@ export class ComponentBase extends HTMLElement {
 
             console.log(`Component ${this.constructor.name} has no children`);
             this.#loaded = true;
+            this.onLoad();
             this.dispatchEvent(new CustomEvent(ComponentBase.LOADED_EVENT, { bubbles: true, composed: true }));
 
         }else{
@@ -295,6 +333,7 @@ export class ComponentBase extends HTMLElement {
         if (this.#loadedChildCount === this.#totalChildCount) {
             this.#loaded = true;
             console.log(`------------------------------>>>>>>>>>>>>>>>             Component ${this.constructor.name} loaded`);
+            this.onLoad();
             this.dispatchEvent(new CustomEvent(ComponentBase.LOADED_EVENT, { bubbles: true, composed: true }));
         }
     }

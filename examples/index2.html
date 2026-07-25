@@ -7,12 +7,10 @@
     <script src="./image/br_image.js" type="module"></script>
     <script type="module">
 
-        import {ComponentBase} from '../src/component_base.js';
-
         window.addEventListener('load', () => {
             const brImage = document.querySelector('br-image');
 
-            brImage.addEventListener(ComponentBase.LOADED_EVENT, () => {
+            brImage.whenLoaded().then(() => {
 
             });
         });

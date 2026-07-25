@@ -12,7 +12,6 @@
 <bench-binding id="binding"></bench-binding>
 
 <script type="module">
-  import { ComponentBase } from '../../src/component_base.js';
   import './ultima/bench-counter/bench-counter.js';
   import './ultima/bench-list/bench-list.js';
   import './ultima/bench-conditional/bench-conditional.js';
@@ -23,26 +22,11 @@
   const elConditional = document.getElementById('conditional');
   const elBinding = document.getElementById('binding');
 
-  function whenLoaded(element) {
-    if (element.loaded) {
-      return Promise.resolve();
-    }
-    return new Promise(resolve => {
-      element.addEventListener(ComponentBase.LOADED_EVENT, function listener(event) {
-        if (event.composedPath()[0] !== element) {
-          return;
-        }
-        element.removeEventListener(ComponentBase.LOADED_EVENT, listener);
-        resolve();
-      });
-    });
-  }
-
   const ready = Promise.all([
-    whenLoaded(elCounter),
-    whenLoaded(elList),
-    whenLoaded(elConditional),
-    whenLoaded(elBinding)
+    elCounter.whenLoaded(),
+    elList.whenLoaded(),
+    elConditional.whenLoaded(),
+    elBinding.whenLoaded()
   ]).then(() => {});
 
   window.bench = {

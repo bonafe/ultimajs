@@ -38,33 +38,32 @@ constructor(propriedades, url_herdeiro)
 
 ### `ComponenteBase.EVENTO_CARREGOU` (`"carregou_componente"`)
 
-Este é o evento mais importante do framework e também a fonte do bug mais recorrente encontrado
-durante a auditoria deste código (ver seção 8.1). Características:
+Este é o evento que sustenta o protocolo de carregamento em cadeia, e por muito tempo foi também a
+fonte do bug mais recorrente encontrado durante a auditoria deste código (ver seção 8.1), porque cada
+subclasse precisava assinar o evento e filtrar a origem manualmente. Características:
 
 - Despachado com `{ bubbles: true, composed: true }` — atravessa fronteiras de Shadow DOM e sobe até
   o topo do documento.
-- **Qualquer listener que reaja a este evento precisa verificar a origem real antes de agir**, porque
-  ele borbulha de *qualquer* descendente (inclusive componentes aninhados dentro de listas, dentro de
-  outros Shadow DOMs) e não só do elemento no qual o listener foi registrado.
-- A forma ingênua de checar a origem — `if (evento.target !== this) return;` — **não é suficiente**
-  quando o descendente que disparou o evento tem seu próprio Shadow Root: o navegador faz
-  *retargeting* do evento ao cruzar a fronteira do Shadow DOM, e `evento.target` aparece como se fosse
-  o próprio elemento observador, mesmo vindo de um descendente diferente. A forma correta é:
+- Ele borbulha de *qualquer* descendente (inclusive componentes aninhados dentro de listas, dentro de
+  outros Shadow DOMs), não só do elemento em que o listener foi registrado — e a forma ingênua de
+  checar a origem, `if (evento.target !== this) return;`, **não é suficiente** quando o descendente
+  que disparou o evento tem seu próprio Shadow Root: o navegador faz *retargeting* do evento ao
+  cruzar essa fronteira, e `evento.target` aparece como se fosse o próprio elemento observador, mesmo
+  vindo de um descendente diferente. A forma correta é filtrar por `evento.composedPath()[0]`.
 
-  ```js
-  this.addEventListener(ComponenteBase.EVENTO_CARREGOU, (evento) => {
-      if (evento.composedPath()[0] !== this) {
-          return;
-      }
-      // ... reagir ao próprio carregamento
-  });
-  ```
+Hoje essa checagem não é mais algo que cada subclasse precise repetir. No código-fonte atual (em
+inglês), a classe expõe dois pontos de extensão que já encapsulam isso:
 
-  `composedPath()[0]` sempre revela o alvo real, independente de quantas fronteiras de Shadow DOM o
-  evento tenha cruzado. Vários componentes do projeto já foram corrigidos para usar esse padrão;
-  outros ainda usam a checagem ingênua e funcionam apenas porque, na topologia atual, não têm
-  descendentes com Shadow DOM próprio entre eles e a origem esperada (ver seção 8.1 para o
-  levantamento completo).
+- **`onLoad()`** — método para sobrescrever nas subclasses; é chamado diretamente pelo próprio
+  `checkLoading()`/`checkIfAllChildrenLoaded()` no exato momento em que **esta instância** (não um
+  descendente) termina de carregar, então não há evento nem `composedPath()` para lidar — a subclasse
+  só sobrescreve `onLoad()` (chamando `super.onLoad()`) e usa o corpo do método como o "só aqui: o
+  componente terminou de carregar" de antes.
+- **`whenLoaded()`** — para código fora da hierarquia da classe (ex: a página que usa o componente),
+  onde sobrescrever `onLoad()` não é possível. Retorna uma Promise que resolve uma única vez, seja o
+  elemento já carregado ou não; internamente ainda usa `EVENTO_CARREGOU` + a checagem de
+  `composedPath()[0]` descrita acima, porque esse caso continua exposto ao mesmo problema de
+  retargeting — só que agora a checagem mora dentro do framework, não em cada chamador.
 
 ### Outros métodos relevantes
 
@@ -261,9 +260,9 @@ item.
 
 ### Ciclo de vida
 
-O construtor registra um listener de `EVENTO_CARREGOU` (com a checagem de `composedPath()[0]`
-descrita em 2.1) que chama `renderizar()` assim que o próprio componente termina de montar.
-`renderizar()` também é chamado toda vez que `atualizar_dados()` processa uma mudança real, e é
-seguro chamá-lo antes do componente estar `carregado` (ele simplesmente não faz nada nesse caso — os
-dados já ficam guardados em `this.#dados` e a próxima chamada, disparada pelo evento de carregamento,
-os aplica).
+`ComponenteReativo` sobrescreve `onLoad()` (descrito em 2.1) para chamar `renderizar()` assim que o
+próprio componente termina de montar — sem precisar de listener nem checagem de `composedPath()[0]`,
+já que `onLoad()` só é chamado para a própria instância. `renderizar()` também é chamado toda vez que
+`atualizar_dados()` processa uma mudança real, e é seguro chamá-lo antes do componente estar
+`carregado` (ele simplesmente não faz nada nesse caso — os dados já ficam guardados em `this.#dados`
+e a próxima chamada, disparada por `onLoad()`, os aplica).

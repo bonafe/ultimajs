@@ -64,28 +64,49 @@
       <li><code class="linha">subclassUrl</code> — always the child class's <code class="linha">import.meta.url</code>.</li>
     </ul>
 
-    <h3>The loaded event</h3>
+    <h3>Reacting to loading: onLoad()</h3>
+    <p>
+      Override <code class="linha">onLoad()</code> to run initialization once the component — and all
+      of its descendants that are also <code class="linha">ComponentBase</code> — finish mounting.
+      It's called exactly once per instance, directly at the point the framework determines loading is
+      complete, so there's no event to subscribe to and no filtering to do yourself:
+    </p>
+    <div class="bloco-codigo">
+      <pre><code><span class="tag">onLoad</span>() {
+    <span class="tag">super</span>.onLoad();
+    <span class="com">// the component itself finished loading — safe to read this.rootNode, set initial state, etc.</span>
+}</code></pre>
+    </div>
+    <p>
+      <code class="linha">ReactiveComponent</code> itself overrides <code class="linha">onLoad()</code>
+      to trigger the first <code class="linha">render()</code> — subclasses that override it too must
+      call <code class="linha">super.onLoad()</code>, the same rule as any other overridden hook.
+    </p>
+
+    <h3>The loaded event (for code outside the component)</h3>
     <p>
       <code class="linha">ComponentBase.LOADED_EVENT</code> ("<code class="linha">component-loaded</code>")
-      fires when the component — and all of its descendants that are also
-      <code class="linha">ComponentBase</code> — finish mounting. It bubbles
-      (<code class="linha">bubbles:true, composed:true</code>) and crosses Shadow DOM boundaries.
+      is the event backing <code class="linha">onLoad()</code>. It bubbles
+      (<code class="linha">bubbles:true, composed:true</code>) and crosses Shadow DOM boundaries, which
+      is what lets a parent component know when a nested child is done. Code that isn't the
+      component's own class (e.g. the page that uses it) can't override <code class="linha">onLoad()</code>,
+      so use <code class="linha">element.whenLoaded()</code> instead — it returns a Promise that
+      resolves once, whether the element is already loaded or not:
     </p>
-    <div class="aviso">
-      <strong>Use <code class="linha">event.composedPath()[0]</code>, not
-      <code class="linha">event.target</code>.</strong> When a descendant component has its own
-      Shadow Root, the browser retargets the event as it crosses that boundary —
-      <code class="linha">event.target</code> shows up as the listening element itself, even when the
-      event came from a different descendant. Without this check, a listener can react to loads that
-      aren't its own — in practice this has already caused real re-render loops in this project.
-    </div>
     <div class="bloco-codigo">
-      <pre><code><span class="tag">this</span>.addEventListener(ComponentBase.LOADED_EVENT, (event) =&gt; {
-    <span class="tag">if</span> (event.composedPath()[<span class="str">0</span>] !== <span class="tag">this</span>) {
-        <span class="tag">return</span>;
-    }
-    <span class="com">// only here: the component itself finished loading</span>
+      <pre><code>brTest.whenLoaded().then(() =&gt; {
+    <span class="com">// the brTest element itself finished loading</span>
 });</code></pre>
+    </div>
+    <div class="aviso">
+      <strong>Why not just <code class="linha">addEventListener(ComponentBase.LOADED_EVENT, ...)</code>?</strong>
+      The event bubbles from <em>any</em> descendant, not just the element the listener is on, and when
+      a descendant has its own Shadow Root the browser retargets it —
+      <code class="linha">event.target</code> shows up as the listening element itself even though the
+      event came from inside the descendant. <code class="linha">whenLoaded()</code> already filters
+      that out internally via <code class="linha">event.composedPath()[0]</code> and removes its
+      listener after resolving once — this has already caused real re-render loops in this project
+      when done by hand, which is why it's now built in rather than a pattern to repeat per component.
     </div>
 
     <h2>ReactiveComponent</h2>

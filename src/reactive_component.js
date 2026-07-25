@@ -79,22 +79,16 @@ export class ReactiveComponent extends ComponentBase {
         this.#elementsWithListener = new WeakSet();
 
         this.refs = {};
+    }
 
-        this.addEventListener(ComponentBase.LOADED_EVENT, (event) => {
-
-            //The event also bubbles up from any descendant that loads later (e.g. a reactive
-            //component nested inside a list). Without this check, every descendant load would
-            //re-enter here and re-render for nothing.
-            //Uses composedPath()[0] instead of event.target: when the descendant has its own shadow
-            //root (e.g. another nested ReactiveComponent), the browser "retargets" the event and
-            //event.target shows up as this element itself even though it came from inside the
-            //descendant — composedPath()[0] reveals the real origin, unaffected by that.
-            if (event.composedPath()[0] !== this) {
-                return;
-            }
-
-            this.render();
-        });
+    /**
+     * Renders once this component's own template and every descendant have finished loading. Any
+     * this.#state set before that point (e.g. from the constructor) is already stored and simply
+     * gets applied now — see the early return at the top of render().
+     */
+    onLoad() {
+        super.onLoad();
+        this.render();
     }
 
 
@@ -208,9 +202,8 @@ export class ReactiveComponent extends ComponentBase {
     render() {
 
         //The template may not have finished loading yet (e.g. state was set before the template
-        //fetch completed). In that case there's nothing to render yet; when loading finishes, the
-        //LOADED_EVENT listener in the constructor calls render() again with the this.#state that's
-        //already stored.
+        //fetch completed). In that case there's nothing to render yet; when loading finishes,
+        //onLoad() calls render() again with the this.#state that's already stored.
         if (!this.loaded) {
             return;
         }

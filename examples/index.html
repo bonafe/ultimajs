@@ -7,21 +7,9 @@
     <script src="./br-test.js" type="module"></script>
     <script type="module">
 
-        import {ComponentBase} from '../src/component_base.js';
-
         window.addEventListener('load', () => {
             const brTest = document.querySelector('br-test');
-            //The event also bubbles up from any nested br-address that loads later (inside the
-            //address list); without this check, each one would re-run this listener, which would set
-            //data-state again, rebuilding the whole list — an infinite loop. Uses composedPath()[0]
-            //instead of event.target because br-address has its own shadow root: the browser
-            //"retargets" the event and event.target shows up as brTest even though it came from
-            //inside the nested br-address.
-            brTest.addEventListener(ComponentBase.LOADED_EVENT, (event) => {
-
-                if (event.composedPath()[0] !== brTest) {
-                    return;
-                }
+            brTest.whenLoaded().then(() => {
 
                 console.log('brTest loaded');
 
