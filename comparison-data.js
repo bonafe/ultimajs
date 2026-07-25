@@ -1,6 +1,6 @@
 // Data for the "How it's done in practice" panel in comparison.html. The Ultima, Litedom,
 // Alpine.js, Lit, Minze and VanJS snippets were adapted (simplified for readability) from the real
-// implementations tested in benchmarks/implementacoes/*.html and src/html/componentes/benchmark/ —
+// implementations tested in benchmarks/implementacoes/*.html and benchmarks/implementations/ultima/ —
 // this isn't pseudocode, it's the same API used and validated in the browser to produce the
 // benchmark numbers.
 
