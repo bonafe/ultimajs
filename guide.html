@@ -109,6 +109,26 @@
       when done by hand, which is why it's now built in rather than a pattern to repeat per component.
     </div>
 
+    <h3>When loading fails</h3>
+    <p>
+      A template is fetched up to <code class="linha">ComponentBase.MAX_LOAD_ATTEMPTS</code> times; a
+      non-2xx response counts as a failure. If every attempt fails, the component fires
+      <code class="linha">ComponentBase.ERROR_EVENT</code> ("<code class="linha">component-error</code>", same
+      bubbling rules as the loaded event) and its <code class="linha">failed</code> property becomes
+      <code class="linha">true</code>. A parent treats a failed child as settled, so one broken component
+      doesn't leave its ancestors waiting forever. A CSS file or <code class="linha">&lt;script&gt;</code> that
+      fails to load is logged, but the component still loads, and an exception thrown by
+      <code class="linha">onLoad()</code> is logged without blocking the loaded event.
+    </p>
+    <p>
+      Templates and CSS are fetched once per URL for the life of the page, however many instances exist;
+      scripts referenced by templates load once per <code class="linha">src</code>, in the document, and honor
+      <code class="linha">integrity</code> (SRI). Subclasses that override
+      <code class="linha">connectedCallback()</code>/<code class="linha">disconnectedCallback()</code> must call
+      <code class="linha">super</code>: the base class releases its <code class="linha">ResizeObserver</code> when
+      the element leaves the document.
+    </p>
+
     <h2>ReactiveComponent</h2>
     <p>
       Adds declarative reactivity via <code class="linha">data-*</code> attributes read from the

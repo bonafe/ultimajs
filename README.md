@@ -16,8 +16,8 @@ O UltimaJS implementa a reatividade de forma simples e elegante, permitindo que 
 ## Estrutura Modular e Flexível
 
 O framework é construído em torno de duas classes principais:
-- **ComponenteBase:** Fornece a infraestrutura para carregar e gerenciar templates HTML, scripts e estilos de forma modular, além de oferecer suporte à observação de mudanças no DOM.
-- **ComponenteReativo:** Estende `ComponenteBase` para adicionar reatividade, permitindo a atualização automática de elementos em resposta a mudanças nos dados.
+- **ComponentBase:** Fornece a infraestrutura para carregar e gerenciar templates HTML, scripts e estilos de forma modular, além de oferecer suporte à observação de mudanças no DOM.
+- **ReactiveComponent:** Estende `ComponentBase` para adicionar reatividade, permitindo a atualização automática de elementos em resposta a mudanças nos dados.
 
 Ambas as classes são projetadas para serem extensíveis, permitindo que os desenvolvedores criem seus próprios componentes personalizados com facilidade.
 
@@ -28,6 +28,10 @@ O projeto Ultima começou em 2020 como uma implementação de um framework MVC u
 ## Comece a Usar
 
 Para começar a usar o UltimaJS, basta incluir os arquivos JavaScript do framework em seu projeto e começar a criar componentes personalizados que se integram perfeitamente ao DOM do navegador.
+
+## Testes
+
+Não há build nem dependências. Sirva a raiz do repositório (`python3 -m http.server`) e abra `/tests/` no navegador; o resultado aparece na página e em `document.title`.
 
 ## Referências e Inspirações
 

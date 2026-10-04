@@ -1,26 +1,24 @@
+# UltimaJS vs. Vue.js: estado atual
 
-# Comparação entre Vue.js e UltimaJS (ComponenteReativo)
+Comparação das funcionalidades essenciais do Vue.js com o que o UltimaJS (`ReactiveComponent`) já implementa.
 
-Aqui está uma comparação entre as funcionalidades essenciais do Vue.js e o que já está implementado no framework UltimaJS, particularmente no `ComponenteReativo`.
+| Funcionalidade | Vue.js | UltimaJS | Status |
+|---|---|---|---|
+| Template syntax | `{{ }}`, diretivas | atributos `data-*` (sem interpolação de texto) | Implementado (outra sintaxe) |
+| Reatividade | `ref`, `reactive` | `state`, `data-state`, `attributeChangedCallback` | Implementado |
+| Computed | `computed` | `computed()` | Implementado |
+| Class/Style bindings | `:class`, `:style` | `data-class`, `data-style` | Implementado |
+| Renderização condicional | `v-if`, `v-else-if`, `v-else` | `data-if`, `data-else-if`, `data-else` | Implementado |
+| Listas | `v-for` + `key` | `data-for` com reconciliação por chave | Implementado |
+| Form bindings | `v-model` | `data-bind` com evento `change` (duas vias) | Implementado |
+| Watchers | `watch` | `watchers()` | Implementado |
+| Template refs | `ref` | `data-ref` / `this.refs` | Implementado |
+| Lifecycle | `mounted`, ... | `onLoad()`, `whenLoaded()`, `LOADED_EVENT`, `ERROR_EVENT` | Implementado |
+| Componentes | SFC | `ComponentBase` + `ReactiveComponent` | Implementado |
+| Event handling | `v-on` | `data-on` | Implementado |
+| Criação de aplicação | `createApp` | n/a | Fora de escopo |
 
-| **Funcionalidade**               | **Vue.js**                                      | **UltimaJS (ComponenteReativo)**                        | **Status no UltimaJS**                     |
-|----------------------------------|-------------------------------------------------|--------------------------------------------------------|--------------------------------------------|
-| **Creating an Application**      | `createApp`                                     | **Não Implementado**                                    | **Pendente**                               |
-| **Template Syntax**              | Interpolação com `{{ }}`, diretivas como `v-if`  | `data-mapa`, `data-para-cada`                           | **Implementado Parcialmente**              |
-| **Reactivity Fundamentals**      | Reatividade através de `ref`, `reactive`         | `dados`, `atualizar_dados`, `attributeChangedCallback`  | **Implementado**                           |
-| **Computed Properties**          | `computed`                                      | **Não Implementado**                                    | **Pendente**                               |
-| **Class and Style Bindings**      | `:class`, `:style`                              | **Não Implementado**                                    | **Pendente**                               |
-| **Conditional Rendering**        | `v-if`, `v-else-if`, `v-else`                    | **Não Implementado**                                    | **Pendente**                               |
-| **List Rendering**               | `v-for`                                         | `data-para-cada`                                        | **Implementado**                           |
-| **Event Handling**               | `v-on`                                          | `gerar_funcao_mudanca_conteudo`                         | **Implementado Parcialmente**              |
-| **Form Input Bindings**          | `v-model`                                       | **Não Implementado**                                    | **Pendente**                               |
-| **Lifecycle Hooks**              | `mounted`, `created`, `beforeDestroy`, etc.      | `connectedCallback`, `disconnectedCallback`             | **Implementado**                           |
-| **Watchers**                     | `watch`                                         | `attributeChangedCallback`                              | **Implementado Parcialmente**              |
-| **Template Refs**                | Acesso a elementos com `ref`                     | **Não Implementado**                                    | **Pendente**                               |
-| **Components Basics**            | Criação e reutilização de componentes            | `ComponenteBase`, `ComponenteReativo`                   | **Implementado**                           |
+## Pendências conhecidas
 
-## Resumo
-
-O UltimaJS, através do `ComponenteReativo`, já implementa algumas funcionalidades essenciais, como a reatividade, renderização de listas e manipulação de eventos em nível básico. No entanto, muitas funcionalidades importantes, como renderização condicional, binding de classes e estilos, e templates refs, ainda não estão implementadas e representam áreas para desenvolvimento futuro.
-
-Essa tabela pode servir como um guia para as próximas etapas de implementação, ajudando a priorizar as funcionalidades a serem adicionadas.
+- Interpolação de texto inline no template.
+- Os testes de regressão (`tests/`) cobrem os bugs corrigidos até agora; ampliar a cobertura (Shadow DOM aninhado com listas, `ResizeObserver` com `processNewDimensions`).

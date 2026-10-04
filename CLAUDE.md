@@ -42,11 +42,15 @@ dependency instead.
 
 ## Commands
 
-There's no `package.json`, package manager, linter, or test suite configured in this project.
-Serve the repository root with any static file server — there's no build step, e.g.:
+There's no `package.json`, package manager, or linter. Serve the repository root with any static
+file server — there's no build step, e.g.:
 ```
 python3 -m http.server
 ```
+Regression tests live in `tests/` (zero-dependency, browser-run): open `/tests/` while serving the
+root, or run `tests/run.sh` for headless Chrome with a non-zero exit code on failure (this is what CI
+runs). Add a test with every bug fix. User-visible changes go in `CHANGELOG.md`; the version is
+`ComponentBase.VERSION`.
 
 ## Architecture
 

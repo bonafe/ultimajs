@@ -59,6 +59,7 @@
         <tr><td><code>data-bind</code></td><td>any element</td><td><code>{"attribute":"path"}</code></td><td>Two-way attribute/property binding</td></tr>
         <tr><td><code>data-class</code></td><td>any element</td><td><code>{"class":"boolean.path"}</code></td><td>Toggles CSS classes</td></tr>
         <tr><td><code>data-style</code></td><td>any element</td><td><code>{"css-property":"path"}</code></td><td>Sets inline style properties</td></tr>
+        <tr><td><code>data-on</code></td><td>any element</td><td><code>{"event":"method"}</code></td><td>Calls <code>this.method(event, scope)</code> when the event fires</td></tr>
         <tr><td><code>data-ref</code></td><td>any element</td><td><code>"name"</code></td><td>Exposes the element on <code>this.refs.name</code></td></tr>
         <tr><td><code>data-if</code></td><td><code>&lt;template&gt;</code></td><td><code>"path"</code></td><td>Starts a conditional chain</td></tr>
         <tr><td><code>data-else-if</code></td><td><code>&lt;template&gt;</code></td><td><code>"path"</code></td><td>Continues the conditional chain</td></tr>
@@ -89,7 +90,26 @@
     <p>
       The same syntax composes nested reactive components: <code class="linha">data-bind='{"data-state":"path"}'</code>
       on a <code class="linha">&lt;child-component&gt;</code> passes a whole object down into it, both ways.
+      A light-DOM child renders its own content with its own state: the parent only binds the child
+      element itself, not what's inside it.
     </p>
+    <p>
+      Boolean properties (<code class="linha">disabled</code>, <code class="linha">checked</code>,
+      <code class="linha">hidden</code>, <code class="linha">required</code>, …) are driven through the
+      property, so <code class="linha">false</code> really means off. A <code class="linha">null</code> or
+      <code class="linha">undefined</code> value clears the attribute (or empties <code class="linha">value</code>
+      and <code class="linha">textContent</code>) instead of printing "undefined". In a list of primitives
+      (<code class="linha">n in nums</code>), binding to the item variable writes back into that slot of the array.
+    </p>
+    <div class="aviso">
+      <strong>Safety.</strong> Values from state are never turned into code: event handler attributes
+      (<code class="linha">on*</code>) and <code class="linha">srcdoc</code> are never bound, and URL attributes
+      (<code class="linha">href</code>, <code class="linha">src</code>, <code class="linha">action</code>, …) refuse
+      <code class="linha">javascript:</code>, <code class="linha">vbscript:</code> and
+      <code class="linha">data:text/html</code> values (a warning is logged). Malformed JSON in
+      <code class="linha">data-bind</code>/<code class="linha">data-class</code>/<code class="linha">data-style</code>
+      or in <code class="linha">data-state</code> is reported with <code class="linha">console.error</code> and ignored.
+    </div>
 
     <h2 id="data-class">data-class</h2>
     <div class="bloco-codigo">
@@ -104,6 +124,28 @@
     </div>
     <p>Sets an inline style property from the path's value. If the value is
     <code class="linha">undefined</code>/<code class="linha">null</code>, the property is removed.</p>
+
+    <h2 id="data-on">data-on</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">button</span> <span class="atr">data-on</span>=<span class="str">'{"click":"save"}'</span>&gt;Save&lt;/<span class="tag">button</span>&gt;
+
+&lt;<span class="tag">template</span> <span class="atr">data-for</span>=<span class="str">"task in tasks : id"</span>&gt;
+  &lt;<span class="tag">button</span> <span class="atr">data-on</span>=<span class="str">'{"click":"remove"}'</span>&gt;x&lt;/<span class="tag">button</span>&gt;
+&lt;/<span class="tag">template</span>&gt;
+
+<span class="com">// in the component class</span>
+remove(event, scope) {
+    this.state = { ...this.state, tasks: this.state.tasks.filter(t =&gt; t.id !== scope.task.id) };
+}</code></pre>
+    </div>
+    <p>
+      Maps native event names to <strong>methods of the component</strong> (never to arbitrary code). The
+      method receives the event and the element's read scope: state, computed values and, inside a
+      <code class="linha">data-for</code>, the loop variables (<code class="linha">scope.task</code> above). A name that
+      isn't a method is reported with <code class="linha">console.error</code>. One listener per element and
+      event is created for the element's whole life, so re-rendering never stacks handlers, and
+      keyed list items always call the handler with their current item.
+    </p>
 
     <h2 id="data-ref">data-ref</h2>
     <div class="bloco-codigo">
