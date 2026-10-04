@@ -4,9 +4,39 @@ export class ComponentBase extends HTMLElement {
 
 
 
+    static VERSION = '0.2.0';
+
     static LOADED_EVENT = "component-loaded";
 
+    //Fired (bubbling, composed) when the template can't be loaded after every attempt. A parent
+    //counts a failed child as settled, so one broken component doesn't leave its ancestors waiting forever.
+    static ERROR_EVENT = "component-error";
+
     static MAX_LOAD_ATTEMPTS = 3; // Gives up after 3 failed attempts to load a resource
+
+    //Fetched text per resolved URL (templates and CSS), shared by every instance of every component:
+    //a list of 1000 components costs one request, not 1000. Only successes are cached, so a failed
+    //fetch is retried by the next attempt/instance. Lives for the page's lifetime (reload to refresh).
+    static #textCache = new Map();
+
+    //Scripts referenced by templates are loaded once per resolved src and type, however many
+    //instances (or components) reference them.
+    static #scriptCache = new Map();
+
+    static #fetchText(url) {
+        const key = String(url);
+        if (!ComponentBase.#textCache.has(key)) {
+            const promise = fetch(url).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.text();
+            });
+            ComponentBase.#textCache.set(key, promise);
+            promise.catch(() => ComponentBase.#textCache.delete(key));
+        }
+        return ComponentBase.#textCache.get(key);
+    }
 
 
 
@@ -18,6 +48,7 @@ export class ComponentBase extends HTMLElement {
     #baseUrl;
 
     #loaded;
+    #failed;
 
     #totalChildCount;
     #loadedChildCount;
@@ -42,6 +73,7 @@ export class ComponentBase extends HTMLElement {
 
 
         this.#loaded = false;
+        this.#failed = false;
 
         this.#totalChildCount = 0;
         this.#loadedChildCount = 0;
@@ -68,6 +100,11 @@ export class ComponentBase extends HTMLElement {
     // Getter for loaded
     get loaded(){
         return this.#loaded;
+    }
+
+    // true if the template couldn't be loaded (see ERROR_EVENT)
+    get failed(){
+        return this.#failed;
     }
 
 
@@ -143,23 +180,30 @@ export class ComponentBase extends HTMLElement {
 
 
     /**
-     * Loads the component's HTML template
+     * Loads the component's HTML template, retrying up to MAX_LOAD_ATTEMPTS times. A template that
+     * can't be fetched (network error or non-2xx status) fires ERROR_EVENT. Failing CSS/scripts
+     * referenced by a template that did load are logged, but don't prevent the component from loading.
      * @param {string} templateUrl - URL of the HTML template
-     * @param {number} [attempts=1] - Number of load attempts made so far
      */
-    async loadTemplate(templateUrl, attempts = 1) {
-        if (attempts == undefined) {
-            attempts = 0;
+    async loadTemplate(templateUrl) {
+        let pageText;
+        let lastError;
+
+        for (let attempt = 1; attempt <= ComponentBase.MAX_LOAD_ATTEMPTS; attempt++) {
+            try {
+                pageText = await ComponentBase.#fetchText(this.resolveAddress(templateUrl));
+                break;
+            } catch (error) {
+                lastError = error;
+            }
         }
 
-        attempts++;
-        if (attempts > ComponentBase.MAX_LOAD_ATTEMPTS) {
-            console.error(`Error loading template: ${templateUrl} MAX ATTEMPTS EXCEEDED (${attempts})`);
+        if (pageText === undefined) {
+            console.error(`Error loading template: ${templateUrl} (${lastError.message}) after ${ComponentBase.MAX_LOAD_ATTEMPTS} attempts`);
+            this.#failed = true;
+            this.dispatchEvent(new CustomEvent(ComponentBase.ERROR_EVENT, { bubbles: true, composed: true, detail: lastError }));
             return false;
         }
-
-        let response = await fetch(this.resolveAddress(templateUrl));
-        let pageText = await response.text();
 
         let template = document.createElement("template");
         template.innerHTML = pageText;
@@ -172,17 +216,19 @@ export class ComponentBase extends HTMLElement {
         // Fixes relative paths on tags like <img>, <a> and others
         this.fixRelativePaths(element);
 
-        Promise.all([
+        const results = await Promise.allSettled([
             ...hrefLinks.map(cssUrl => this.loadCSS(cssUrl)),
             ...scripts.map(script => this.loadScript(script))
-        ]).then(results => {
-            // After loading all the CSS;
-            this.#rootNode.appendChild(element);
-            this.observe();
+        ]);
 
-            setTimeout(() => {
-                this.checkLoading();
-            });
+        results.filter(result => result.status === 'rejected')
+            .forEach(() => console.error(`[${this.constructor.name}] a resource referenced by the template failed to load`));
+
+        this.#rootNode.appendChild(element);
+        this.observe();
+
+        setTimeout(() => {
+            this.checkLoading();
         });
     }
 
@@ -256,13 +302,15 @@ export class ComponentBase extends HTMLElement {
 
 
     observe() {
-        this.resizeObserver = new ResizeObserver(entries => {
-            entries.forEach(entry => {
-                if (this.processNewDimensions) {
-                    this.processNewDimensions(entry.target.clientWidth, entry.target.clientHeight);
-                }
+        if (!this.resizeObserver) {
+            this.resizeObserver = new ResizeObserver(entries => {
+                entries.forEach(entry => {
+                    if (this.processNewDimensions) {
+                        this.processNewDimensions(entry.target.clientWidth, entry.target.clientHeight);
+                    }
+                });
             });
-        });
+        }
 
         // Observes the first element with the "observed" class
         let observedElement = this.#rootNode.querySelector(".observed");
@@ -275,33 +323,25 @@ export class ComponentBase extends HTMLElement {
 
     checkLoading(){
 
-        console.log(`--------------------------------------------------------------`);
-        console.log(`Checking loading of ${this.constructor.name}`);
 
         const allDescendants = this.#rootNode.querySelectorAll('*');
 
         this.#baseComponentChildren = Array.from(allDescendants).filter(child => child instanceof ComponentBase);
 
-        console.log(`Number of children: ${this.#baseComponentChildren.length}`);
 
 
         this.#totalChildCount = this.#baseComponentChildren.length;
 
         if (this.#totalChildCount === 0) {
 
-            console.log(`Component ${this.constructor.name} has no children`);
-            this.#loaded = true;
-            this.onLoad();
-            this.dispatchEvent(new CustomEvent(ComponentBase.LOADED_EVENT, { bubbles: true, composed: true }));
+            this.#finishLoading();
 
         }else{
             this.#baseComponentChildren.forEach(child => {
 
-                console.log(`*****************>>>>>>>      Checking loading of ${child.constructor.name}`);
 
-                if (child.loaded) {
+                if (child.loaded || child.failed) {
 
-                    console.log(`Component ${child.constructor.name} already loaded`);
 
                     this.#loadedChildCount++;
 
@@ -309,103 +349,111 @@ export class ComponentBase extends HTMLElement {
 
                 }else{
 
-                    console.log(`Component ${child.constructor.name} not loaded yet. Adding listener`);
 
-                    child.addEventListener(ComponentBase.LOADED_EVENT, event => {
+                    const onChildSettled = event => {
 
-                        console.log(`!-!_!-!-!_!_!__!---   Event ${ComponentBase.LOADED_EVENT} fired by ${child.constructor.name}`);
-
-                        // The child's event does not propagate further
+                        // Only the child's own event counts (not ones bubbling up from its descendants),
+                        // and it does not propagate further
+                        if (event.composedPath()[0] !== child) {
+                            return;
+                        }
                         event.stopPropagation();
 
                         this.#loadedChildCount++;
 
                         this.checkIfAllChildrenLoaded();
-                    });
+                    };
+
+                    child.addEventListener(ComponentBase.LOADED_EVENT, onChildSettled);
+                    child.addEventListener(ComponentBase.ERROR_EVENT, onChildSettled);
                 }
             });
         }
     }
 
     checkIfAllChildrenLoaded(){
-        console.log(`Loaded children: ${this.#loadedChildCount} of ${this.#totalChildCount}`);
         // If all children are loaded
         if (this.#loadedChildCount === this.#totalChildCount) {
-            this.#loaded = true;
-            console.log(`------------------------------>>>>>>>>>>>>>>>             Component ${this.constructor.name} loaded`);
-            this.onLoad();
-            this.dispatchEvent(new CustomEvent(ComponentBase.LOADED_EVENT, { bubbles: true, composed: true }));
+            this.#finishLoading();
         }
     }
 
-    connectedCallback() {}
+    //An exception in a subclass's onLoad() is reported, but must not stop LOADED_EVENT: otherwise
+    //every ancestor (and every whenLoaded() caller) would wait forever.
+    #finishLoading() {
+        this.#loaded = true;
+        try {
+            this.onLoad();
+        } catch (error) {
+            console.error(`[${this.constructor.name}] error in onLoad():`, error);
+        }
+        this.dispatchEvent(new CustomEvent(ComponentBase.LOADED_EVENT, { bubbles: true, composed: true }));
+    }
 
-    disconnectedCallback() {}
+    /**
+     * Subclasses that override connectedCallback/disconnectedCallback must call super: the
+     * ResizeObserver is released when the element leaves the document and re-attached if it comes back.
+     */
+    connectedCallback() {
+        if (this.#loaded) {
+            this.observe();
+        }
+    }
+
+    disconnectedCallback() {
+        this.resizeObserver?.disconnect();
+    }
 
     adoptedCallback() {}
 
-    loadCSS(address, childUrl, attempts = 1) {
-        let cssUrl = (childUrl ? ComponentBase.resolveAddress(address, childUrl) : this.resolveAddress(address));
+    loadCSS(address, childUrl) {
+        const cssUrl = (childUrl ? ComponentBase.resolveAddress(address, childUrl) : this.resolveAddress(address));
 
-        if (attempts == undefined) {
-            attempts = 0;
-        }
-        attempts++;
-
-        return new Promise((resolve, reject) => {
-            if (attempts > ComponentBase.MAX_LOAD_ATTEMPTS) {
-                console.log(`Error loading CSS: ${cssUrl} MAX ATTEMPTS EXCEEDED (${attempts})`);
-                return reject();
-            }
-
-            fetch(cssUrl)
-                .then(response => response.text())
-                .then(text => {
-                    let style = document.createElement('style');
-                    style.innerHTML = text;
-
-                    style.addEventListener("load", () => {
-                        resolve(true);
-                    });
-
-                    style.addEventListener("error", (e) => {
-                        reject();
-                    });
-                    this.#rootNode.appendChild(style);
-                })
-                .catch(function (error) {
-                    console.log(`Could not download CSS ${cssUrl}`);
-                    reject();
-                });
+        return ComponentBase.#fetchText(cssUrl).then(text => {
+            const style = document.createElement('style');
+            style.textContent = text;
+            this.#rootNode.appendChild(style);
+            return true;
+        }).catch(error => {
+            console.error(`Could not download CSS ${cssUrl}: ${error.message}`);
+            throw error;
         });
     }
 
     loadScript(scriptAttributes, childUrl) {
-        return new Promise((resolve, reject) => {
-            let script = document.createElement('script');
-            script.setAttribute("async", "");
-            script.src = (childUrl ? ComponentBase.resolveAddress(scriptAttributes.src, childUrl) : this.resolveAddress(scriptAttributes.src));
+        const src = (childUrl ? ComponentBase.resolveAddress(scriptAttributes.src, childUrl) : this.resolveAddress(scriptAttributes.src));
+        const integrity = scriptAttributes.integrity || scriptAttributes.integrityHash;
+        const key = `${scriptAttributes.type || ''}|${src}`;
 
-            if (scriptAttributes.type) {
-                script.setAttribute("type", scriptAttributes.type);
-            }
+        if (!ComponentBase.#scriptCache.has(key)) {
+            const promise = new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = src;
 
-            if (scriptAttributes.integrityHash) {
-                script.integrity = scriptAttributes.integrityHash;
-                script.crossorigin = "anonymous";
-            }
+                if (scriptAttributes.type) {
+                    script.type = scriptAttributes.type;
+                }
 
-            script.addEventListener("load", () => {
-                resolve(true);
+                if (integrity) {
+                    script.integrity = integrity;
+                    script.crossOrigin = "anonymous";
+                }
+
+                script.addEventListener("load", () => resolve(true));
+                script.addEventListener("error", () => {
+                    console.error(`Error loading script: ${script.src}`);
+                    reject(new Error(`could not load ${script.src}`));
+                });
+
+                //Scripts run in the global scope wherever they're attached, so they go to the
+                //document: one that lived inside a component would die with it.
+                document.head.appendChild(script);
             });
+            ComponentBase.#scriptCache.set(key, promise);
+            promise.catch(() => ComponentBase.#scriptCache.delete(key));
+        }
 
-            script.addEventListener("error", (e) => {
-                console.log(`Error loading script: ${script.src}`);
-                console.dir(e);
-                reject();
-            });
-
-            this.#rootNode.appendChild(script);
-        });
+        return ComponentBase.#scriptCache.get(key);
     }
 }
