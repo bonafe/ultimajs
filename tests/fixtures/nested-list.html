@@ -1,0 +1,3 @@
+<template data-for="g in groups : id"><section class="g"><h4 data-bind='{"textContent":"g.title"}'></h4>
+  <template data-for="m in g.members : id"><p class="m" data-bind='{"textContent":"m.name"}'></p></template>
+</section></template>

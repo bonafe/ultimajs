@@ -1,0 +1,9 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  browser-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run browser tests (headless Chrome)
+        run: tests/run.sh

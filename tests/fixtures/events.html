@@ -1,0 +1,3 @@
+<button id="plain" data-on='{"click":"onPlain"}'>x</button>
+<button id="missing" data-on='{"click":"nope"}'>x</button>
+<template data-for="t in tasks : id"><button class="task" data-bind='{"textContent":"t.title"}' data-on='{"click":"onTask"}'></button></template>
