@@ -4,7 +4,7 @@ Comparação das funcionalidades essenciais do Vue.js com o que o UltimaJS (`Rea
 
 | Funcionalidade | Vue.js | UltimaJS | Status |
 |---|---|---|---|
-| Template syntax | `{{ }}`, diretivas | atributos `data-*` (sem interpolação de texto) | Implementado (outra sintaxe) |
+| Template syntax | `{{ }}`, diretivas | `{{ path }}` (só caminhos) + atributos `data-*` | Implementado |
 | Reatividade | `ref`, `reactive` | `state`, `data-state`, `attributeChangedCallback` | Implementado |
 | Computed | `computed` | `computed()` | Implementado |
 | Class/Style bindings | `:class`, `:style` | `data-class`, `data-style` | Implementado |
@@ -20,5 +20,4 @@ Comparação das funcionalidades essenciais do Vue.js com o que o UltimaJS (`Rea
 
 ## Pendências conhecidas
 
-- Interpolação de texto inline no template.
 - Os testes de regressão (`tests/`) cobrem os bugs corrigidos até agora; ampliar a cobertura (Shadow DOM aninhado com listas, `ResizeObserver` com `processNewDimensions`).

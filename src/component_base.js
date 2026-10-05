@@ -4,7 +4,7 @@ export class ComponentBase extends HTMLElement {
 
 
 
-    static VERSION = '0.3.0';
+    static VERSION = '0.4.0';
 
     static LOADED_EVENT = "component-loaded";
 

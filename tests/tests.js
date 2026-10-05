@@ -29,6 +29,7 @@ define('t-cached', 'fixtures/cached.html');
 define('t-observed', 'fixtures/observed.html');
 define('t-sri', 'fixtures/sri.html');
 define('t-nested-list', 'fixtures/nested-list.html');
+define('t-interpolation', 'fixtures/interpolation.html');
 
 class Events extends ReactiveComponent {
     constructor() { super({ templateUrl: 'fixtures/events.html', shadowDom: false }, import.meta.url); this.calls = []; }
@@ -354,6 +355,36 @@ test('mix reports two mixins defining the same member, naming both', () => {
 test('mixins may override a member of the base class', () => {
     const Quiet = Base => class extends Base { whenLoaded() { return super.whenLoaded(); } };
     assert(typeof mix(ReactiveComponent).with(Quiet).prototype.whenLoaded === 'function');
+});
+
+// --- {{ }} text interpolation ---
+
+test('interpolation renders text, updates it on state change and never leaks the source', async () => {
+    const element = await mount('t-interpolation', { user: { name: 'Ana' }, count: 2, meta: { a: 1 }, flag: false });
+    const text = id => element.querySelector('#' + id).textContent;
+    assert(text('greeting') === 'Hello Ana, you have 2 items.', text('greeting'));
+    assert(text('obj') === '{"a":1}', text('obj'));
+    assert(text('neg') === 'true', text('neg'));
+    element.state = { user: { name: 'Bia' }, count: 5, flag: true };
+    assert(text('greeting') === 'Hello Bia, you have 5 items.', text('greeting'));
+    assert(text('neg') === 'false', text('neg'));
+    assert(text('shown') === 'on: 5', text('shown'));
+});
+
+test('interpolation works inside lists (keyed, keyless and bare text) and follows reordering', async () => {
+    const element = await mount('t-interpolation', { tasks: [{ id: 1, title: 'a' }, { id: 2, title: 'b' }], nums: [1, 2] });
+    const items = () => Array.from(element.querySelectorAll('#list li')).map(li => li.textContent).join('|');
+    assert(items() === 'a #|b #', items());
+    element.state = { tasks: [{ id: 2, title: 'b2' }, { id: 1, title: 'a' }], nums: [3, 4, 5] };
+    assert(items() === 'b2 #|a #', items());
+    assert(element.querySelector('#bare').textContent.replace(/\s+/g, '') === '3;4;5;', element.querySelector('#bare').textContent);
+});
+
+test('interpolation leaves data-bind content alone, even when the value contains "{{"', async () => {
+    const element = await mount('t-interpolation', { raw: '{{ count }}', count: 9 });
+    assert(element.querySelector('#bound').textContent === '{{ count }}', element.querySelector('#bound').textContent);
+    element.state = { raw: '{{ count }}', count: 10 };
+    assert(element.querySelector('#bound').textContent === '{{ count }}');
 });
 
 const originalConsoleLog = console.log;

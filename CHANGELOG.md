@@ -3,6 +3,11 @@
 Follows [Semantic Versioning](https://semver.org/); the version lives in `ComponentBase.VERSION`.
 Below 1.0.0, minor versions may contain behavior changes (listed under **Changed**).
 
+## 0.4.0
+
+### Added
+- `{{ path }}` text interpolation in templates (one-way, text only, paths only; works inside `data-if`/`data-for` bodies, including top-level text).
+
 ## 0.3.0
 
 ### Added

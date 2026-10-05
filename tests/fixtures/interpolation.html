@@ -1,0 +1,12 @@
+<p id="greeting">Hello {{ user.name }}, you have {{count}} items{{ missing }}.</p>
+<p id="obj">{{ meta }}</p>
+<p id="neg">{{ !flag }}</p>
+<p id="bound" data-bind='{"textContent":"raw"}'></p>
+<ul id="list">
+    <template data-for="t in tasks : id"><li>{{ t.title }} #{{ i }}</li></template>
+</ul>
+<ul id="bare">
+    <template data-for="n in nums">{{ n }};</template>
+</ul>
+<template data-if="flag"><span id="shown">on: {{ count }}</span></template>
+<template data-else><span id="hidden">off</span></template>

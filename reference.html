@@ -60,6 +60,7 @@
         <tr><td><code>data-class</code></td><td>any element</td><td><code>{"class":"boolean.path"}</code></td><td>Toggles CSS classes</td></tr>
         <tr><td><code>data-style</code></td><td>any element</td><td><code>{"css-property":"path"}</code></td><td>Sets inline style properties</td></tr>
         <tr><td><code>data-on</code></td><td>any element</td><td><code>{"event":"method"}</code></td><td>Calls <code>this.method(event, scope)</code> when the event fires</td></tr>
+        <tr><td><code>{{ path }}</code></td><td>text nodes</td><td><code>Hello {{ user.name }}</code></td><td>Text interpolation (one-way); <code>undefined</code>/<code>null</code> render as empty, objects as JSON</td></tr>
         <tr><td><code>data-ref</code></td><td>any element</td><td><code>"name"</code></td><td>Exposes the element on <code>this.refs.name</code></td></tr>
         <tr><td><code>data-if</code></td><td><code>&lt;template&gt;</code></td><td><code>"path"</code></td><td>Starts a conditional chain</td></tr>
         <tr><td><code>data-else-if</code></td><td><code>&lt;template&gt;</code></td><td><code>"path"</code></td><td>Continues the conditional chain</td></tr>
@@ -146,6 +147,19 @@ remove(event, scope) {
       event is created for the element's whole life, so re-rendering never stacks handlers, and
       keyed list items always call the handler with their current item.
     </p>
+
+    <h2 id="interpolation">Text interpolation — {{ path }}</h2>
+    <div class="bloco-codigo">
+      <pre><code>&lt;<span class="tag">p</span>&gt;Hello {{ user.name }}, you have {{ count }} items&lt;/<span class="tag">p</span>&gt;
+&lt;<span class="tag">template</span> <span class="atr">data-for</span>=<span class="str">"t in tasks"</span>&gt;&lt;<span class="tag">li</span>&gt;{{ t.title }}&lt;/<span class="tag">li</span>&gt;&lt;/<span class="tag">template</span>&gt;</code></pre>
+    </div>
+    <p>Inside any text node, <code class="linha">{{ path }}</code> is replaced by the value at that path
+    (same path syntax as the other bindings, including the leading <code class="linha">!</code> and the
+    <code class="linha">data-for</code> variables). It is one-way and the value is always inserted as
+    text, never as HTML. It is not evaluated inside <code class="linha">&lt;script&gt;</code>,
+    <code class="linha">&lt;style&gt;</code>, <code class="linha">&lt;textarea&gt;</code> or in an element whose
+    <code class="linha">data-bind</code> sets <code class="linha">textContent</code>/<code class="linha">innerHTML</code>.
+    Only paths are supported, not arbitrary expressions: use <code class="linha">computed()</code> for those.</p>
 
     <h2 id="data-ref">data-ref</h2>
     <div class="bloco-codigo">
