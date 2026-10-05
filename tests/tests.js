@@ -1,5 +1,6 @@
 import { ReactiveComponent } from '../src/reactive_component.js';
 import { ComponentBase } from '../src/component_base.js';
+import { mix } from '../src/mixins.js';
 
 //Zero-dependency test runner: each test is an async function that throws (via assert) on failure.
 
@@ -308,6 +309,52 @@ test('data-on with an unknown method logs an error instead of throwing', async (
 });
 
 // --- run ---
+
+// --- mixins ---
+
+test('mix applies mixins left to right and runs every onLoad through super', async () => {
+    const order = [];
+    const A = Base => class extends Base { onLoad() { super.onLoad(); order.push('A'); } hello() { return 'a'; } };
+    const B = Base => class extends Base { onLoad() { super.onLoad(); order.push('B'); } world() { return this.hello() + 'b'; } };
+    class Mixed extends mix(ReactiveComponent).with(A, B) {
+        constructor() { super({ templateUrl: 'fixtures/primitives.html', shadowDom: false }, import.meta.url); }
+    }
+    customElements.define('t-mixed', Mixed);
+    const element = await mount('t-mixed', { nums: [1, 2] });
+    assert(order.join('') === 'AB', `onLoad order: ${order}`);
+    assert(element.world() === 'ab');
+    assert(element.querySelectorAll('.pi').length === 2, 'reactive rendering (#state) must keep working through mixins');
+});
+
+test('mix with no mixins returns the base class', () => {
+    assert(mix(ReactiveComponent).with() === ReactiveComponent);
+});
+
+test('mix rejects values that are not subclass factories', () => {
+    const expect = (mixin, fragment) => {
+        try { mix(ReactiveComponent).with(mixin); } catch (error) { assert(error.message.includes(fragment), error.message); return; }
+        throw new Error('expected an exception');
+    };
+    expect(42, 'must be a function');
+    expect(() => 1, 'must return a subclass');
+    expect(Base => Base, 'must return a subclass');
+    expect(() => class {}, 'must return a subclass');
+});
+
+test('mix reports two mixins defining the same member, naming both', () => {
+    const First = Base => class extends Base { select() {} };
+    const Second = Base => class extends Base { select() {} };
+    try { mix(ReactiveComponent).with(First, Second); } catch (error) {
+        assert(error.message.includes('Second') && error.message.includes('First') && error.message.includes('"select"'), error.message);
+        return;
+    }
+    throw new Error('expected an exception');
+});
+
+test('mixins may override a member of the base class', () => {
+    const Quiet = Base => class extends Base { whenLoaded() { return super.whenLoaded(); } };
+    assert(typeof mix(ReactiveComponent).with(Quiet).prototype.whenLoaded === 'function');
+});
 
 const originalConsoleLog = console.log;
 console.log = () => {};                                  //silences the framework's debug logging

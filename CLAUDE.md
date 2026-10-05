@@ -24,6 +24,7 @@ dependency instead.
 - `src/component_base.js`, `src/controller_base.js`, `src/reactive_component.js` — the entire
   framework. Nothing else is required to use Ultima; copy these three files (or reference them
   directly) into any project.
+  `src/mixins.js` is optional and standalone (`mix(Base).with(...)`): copy it only if you compose mixins.
 - `index.html`, `about.html`, `getting-started.html`, `guide.html`, `reference.html`,
   `examples.html`, `comparison.html` (+ `comparison.js`/`comparison-data.js`), `assets/` — the
   public documentation/marketing site.

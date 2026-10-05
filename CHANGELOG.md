@@ -3,6 +3,11 @@
 Follows [Semantic Versioning](https://semver.org/); the version lives in `ComponentBase.VERSION`.
 Below 1.0.0, minor versions may contain behavior changes (listed under **Changed**).
 
+## 0.3.0
+
+### Added
+- `mix(Base).with(...mixins)` (`src/mixins.js`): composes mixins (functions `Base => class extends Base`) left to right. Rejects values that are not subclass factories and two mixins defining the same member (lifecycle hooks such as `onLoad` are exempt and chain through `super`). Optional: nothing in the core uses it, and existing components are unaffected.
+
 ## 0.2.0
 
 ### Added
