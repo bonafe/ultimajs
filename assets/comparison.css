@@ -10,7 +10,7 @@
 }
 
 .layout-docs-largo {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     max-width: 980px;
 }
 
@@ -66,7 +66,7 @@
 
 .painel-comparacao-codigo {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 20px;
     align-items: start;
     margin-bottom: 8px;
@@ -94,7 +94,7 @@
 
 @media (max-width: 760px) {
     .painel-comparacao-codigo {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

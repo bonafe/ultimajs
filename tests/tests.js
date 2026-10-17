@@ -447,6 +447,22 @@ test('i18n: text produced by JavaScript (comparison notes, benchmark labels) is 
     }
 });
 
+test('no page of the site is wider than a 320px phone screen, in any language', async () => {
+    for (const code of Object.keys(LANGUAGES)) {
+        for (const page of SITE_PAGES) {
+            const frame = document.createElement('iframe');
+            frame.style.cssText = 'width:320px;height:700px;border:0;position:absolute;left:-9999px';
+            frame.src = `../${page}.html?lang=${code}`;
+            document.body.appendChild(frame);
+            await new Promise(resolve => frame.addEventListener('load', resolve, { once: true }));
+            await wait(500);                                  //the dictionary loads after the page does
+            const width = frame.contentDocument.documentElement.scrollWidth;
+            frame.remove();
+            assert(width <= 320, `${page} (${code}) is ${width}px wide`);
+        }
+    }
+});
+
 const originalConsoleLog = console.log;
 console.log = () => {};                                  //silences the framework's debug logging
 const originalConsoleError = console.error;
