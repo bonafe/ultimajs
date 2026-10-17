@@ -6,11 +6,12 @@
 <title>Ultima — Reactive Web Components, 100% native JavaScript</title>
 <meta name="description" content="A framework for building reactive Web Components using only native browser APIs — no build step, no npm, no dependencies.">
 <link rel="stylesheet" href="./assets/estilo.css">
+<script type="module" src="./assets/i18n.js"></script>
 </head>
 <body>
 
 <header class="cabecalho-site">
-  <a class="logo-site" href="./index.html">
+  <a class="logo-site" translate="no" href="./index.html">
     <span class="marca">&lt;/&gt;</span> Ultima
   </a>
   <nav class="nav-site">
@@ -39,6 +40,11 @@
       <a href="./getting-started.html" class="botao botao-primario">Get started</a>
       <a href="https://github.com/bonafe/ultima" class="botao botao-secundario" target="_blank" rel="noopener">View on GitHub</a>
     </div>
+    <p class="subtitulo" style="margin-top: 28px;">
+      New to front-end development? Start with the
+      <a href="./getting-started.html#before-you-start">basic concepts in plain language</a> —
+      no prior framework needed.
+    </p>
   </section>
 
   <section class="secao">
@@ -122,7 +128,7 @@
       <div class="pilar">
         <h3><a href="./getting-started.html">Getting started →</a></h3>
         <p>How to add Ultima to a project and build your first reactive component, with nothing to
-        install.</p>
+        install — including the basic concepts, if you're new to this.</p>
       </div>
       <div class="pilar">
         <h3><a href="./guide.html">Guide →</a></h3>

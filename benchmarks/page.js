@@ -1,4 +1,5 @@
 import { FRAMEWORKS, METRICS, METHODOLOGY, runAll } from './harness.js';
+import { t, onLanguageChange } from '../assets/i18n.js';
 
 const legend = document.getElementById('legenda-frameworks');
 const grid = document.getElementById('grade-resultados');
@@ -11,11 +12,19 @@ const downloadButton = document.getElementById('botao-baixar');
 
 const resultsByMetric = {};
 
+//The last status written by run(), kept in English so it can be translated again if the language changes
+let statusMessage = null;
+
+function setStatus(message) {
+    statusMessage = message;
+    statusEl.textContent = t(message);
+}
+
 function buildLegend() {
     legend.innerHTML = FRAMEWORKS.map((fw) => `
         <span class="item-legenda">
             <span class="amostra-cor" style="background: var(${fw.color})"></span>
-            ${fw.name}${fw.note ? `<span class="badge-abandonado">${fw.note}</span>` : ''}
+            ${fw.name}${fw.note ? `<span class="badge-abandonado">${t(fw.note)}</span>` : ''}
         </span>
     `).join('');
 }
@@ -23,8 +32,8 @@ function buildLegend() {
 function buildGridAndResults() {
     grid.innerHTML = METRICS.map((metric) => `
         <div class="cartao-metrica">
-            <h3>${metric.label}</h3>
-            <p class="descricao-metrica">${metric.description}</p>
+            <h3>${t(metric.label)}</h3>
+            <p class="descricao-metrica">${t(metric.description)}</p>
             ${FRAMEWORKS.map((fw) => `
                 <div class="barra-item sem-dado">
                     <span class="rotulo-framework">${fw.name}</span>
@@ -37,12 +46,12 @@ function buildGridAndResults() {
         </div>
     `).join('');
 
-    tableHeader.innerHTML = '<th scope="col">Metric</th>' +
+    tableHeader.innerHTML = `<th scope="col">${t('Metric')}</th>` +
         FRAMEWORKS.map((fw) => `<th scope="col">${fw.name}</th>`).join('');
 
     tableBody.innerHTML = METRICS.map((metric) => `
         <tr>
-            <th scope="row">${metric.label}</th>
+            <th scope="row">${t(metric.label)}</th>
             ${FRAMEWORKS.map((fw) => `<td id="cel-${metric.id}-${fw.id}">—</td>`).join('')}
         </tr>
     `).join('');
@@ -63,7 +72,7 @@ function updateMetric(frameworkId, metricId, value) {
 
     const cell = document.getElementById(`cel-${metricId}-${frameworkId}`);
     if (cell) {
-        cell.textContent = value === null ? 'error' : `${value.toFixed(1)} ms`;
+        cell.textContent = value === null ? t('error') : `${value.toFixed(1)} ms`;
     }
 
     const knownValues = Object.values(resultsByMetric[metricId]).filter((v) => typeof v === 'number');
@@ -84,7 +93,7 @@ function updateMetric(frameworkId, metricId, value) {
             valueLabel.textContent = `${v.toFixed(1)} ms`;
         } else {
             bar.style.width = '2%';
-            valueLabel.textContent = 'error';
+            valueLabel.textContent = t('error');
         }
     });
 }
@@ -112,7 +121,7 @@ async function run() {
     logEl.textContent = '';
     Object.keys(resultsByMetric).forEach((k) => delete resultsByMetric[k]);
     buildGridAndResults();
-    statusEl.textContent = 'Running… follow the log below.';
+    setStatus('Running… follow the log below.');
 
     await runAll({
         onLog: logLine,
@@ -120,12 +129,24 @@ async function run() {
         onFrameworkDone: (frameworkId) => logLine(`${frameworkId}: done.`)
     });
 
-    statusEl.textContent = 'Benchmark complete.';
+    setStatus('Benchmark complete.');
     runButton.disabled = false;
     downloadButton.disabled = false;
 }
 
 buildLegend();
 buildGridAndResults();
+
+//The text built here is regenerated, keeping the results already measured
+onLanguageChange(() => {
+    buildLegend();
+    buildGridAndResults();
+    Object.entries(resultsByMetric).forEach(([metricId, byFramework]) => {
+        Object.entries(byFramework).forEach(([frameworkId, value]) => updateMetric(frameworkId, metricId, value));
+    });
+    if (statusMessage) {
+        setStatus(statusMessage);
+    }
+});
 runButton.addEventListener('click', run);
 downloadButton.addEventListener('click', downloadResults);

@@ -28,6 +28,12 @@ dependency instead.
 - `index.html`, `about.html`, `getting-started.html`, `guide.html`, `reference.html`,
   `examples.html`, `comparison.html` (+ `comparison.js`/`comparison-data.js`), `assets/` — the
   public documentation/marketing site.
+- `assets/i18n.js` + `assets/i18n/<code>.js` — site internationalization. English is the source text in the
+  HTML; each language is a dictionary mapping the English text (innerHTML, whitespace-collapsed) to its
+  translation, so the HTML needs no markup (`translate="no"` excludes an element). Text built by JavaScript
+  goes through `t()` and the dictionary's `dynamic` section. Editing English text in a page requires
+  updating every dictionary — `tests/` fails on missing, stale or markup-diverging entries. To add a
+  language: create `assets/i18n/<code>.js` and list it in `LANGUAGES`. The `.md` docs stay English.
 - `examples/` — two small, self-contained DSL demos: `index.html`/`br-test.js`/`br-address.js`
   (every binding type at once, including a keyed list where each item is itself a nested reactive
   component) and `index2.html`/`image/` (a simpler single-component example). Both depend only on

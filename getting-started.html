@@ -6,11 +6,13 @@
 <title>Getting Started — Ultima</title>
 <meta name="description" content="How to add Ultima to a project and build your first reactive component, with nothing to install.">
 <link rel="stylesheet" href="./assets/estilo.css">
+<link rel="stylesheet" href="./assets/comparison.css">
+<script type="module" src="./assets/i18n.js"></script>
 </head>
 <body>
 
 <header class="cabecalho-site">
-  <a class="logo-site" href="./index.html">
+  <a class="logo-site" translate="no" href="./index.html">
     <span class="marca">&lt;/&gt;</span> Ultima
   </a>
   <nav class="nav-site">
@@ -49,6 +51,48 @@
       directly, as native ES modules. That's how the project itself is used internally.
     </p>
 
+    <h2 id="before-you-start">Before you start</h2>
+    <p>
+      You don't need to know any framework. You do need the basics of HTML, CSS and JavaScript
+      (variables, functions and classes) and a modern browser — Chrome, Edge, Firefox or Safari.
+      Ultima installs nothing: no Node.js, no npm, no build tool. The only extra you'll use is one
+      command to serve your files (step 4).
+    </p>
+    <p>These are the words you'll meet in the docs, in plain language:</p>
+    <div class="grade-escolha">
+      <div class="pilar pilar-compacto">
+        <h4>Web Component</h4>
+        <p>An HTML tag you create yourself, like <code class="linha">&lt;my-counter&gt;</code>, that
+        bundles its own markup, style and behavior. It's a browser standard, not a library.</p>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Custom Element</h4>
+        <p>The browser feature behind a Web Component: it lets you register a new tag name and tie
+        a JavaScript class to it.</p>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Shadow DOM</h4>
+        <p>A private area inside a component: its CSS doesn't leak out, and the page's CSS doesn't
+        leak in. It's optional in Ultima.</p>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>ES module</h4>
+        <p>A <code class="linha">.js</code> file that shares code with other files through
+        <code class="linha">import</code> and <code class="linha">export</code>. Browsers understand
+        it natively with <code class="linha">&lt;script type="module"&gt;</code>.</p>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Reactive</h4>
+        <p>When the data changes, the screen updates by itself. You change
+        <code class="linha">state</code> and Ultima takes care of the page.</p>
+      </div>
+      <div class="pilar pilar-compacto">
+        <h4>Template</h4>
+        <p>The component's HTML file, where <code class="linha">data-*</code> attributes say which
+        piece of data goes where.</p>
+      </div>
+    </div>
+
     <h2>1. Get the core files</h2>
     <p>
       Copy (or clone the repository and reference) the two files that make up the framework's core:
@@ -79,6 +123,11 @@ src/reactive_component.js</code></pre>
   &lt;<span class="tag">button</span> <span class="atr">id</span>=<span class="str">"increment"</span>&gt;+1&lt;/<span class="tag">button</span>&gt;
 &lt;/<span class="tag">div</span>&gt;</code></pre>
     </div>
+    <p>
+      The <code class="linha">data-bind</code> attribute says "put the value of <code class="linha">total</code>
+      from the state inside this <code class="linha">span</code>". You never write code to update it:
+      when <code class="linha">total</code> changes, the text changes.
+    </p>
 
     <div class="bloco-codigo">
       <div class="barra">
@@ -112,11 +161,38 @@ src/reactive_component.js</code></pre>
 customElements.define(<span class="str">'my-counter'</span>, MyCounter);</code></pre>
     </div>
 
+    <p>
+      In short: the constructor tells Ultima where the template is, <code class="linha">onLoad()</code>
+      runs when the template is ready (it sets the starting state and the button's click), and the
+      last line registers the <code class="linha">&lt;my-counter&gt;</code> tag in the browser. Tag names
+      must contain a hyphen.
+    </p>
+
     <h2>3. Use the component</h2>
     <div class="bloco-codigo">
       <pre><code>&lt;<span class="tag">script</span> <span class="atr">type</span>=<span class="str">"module"</span> <span class="atr">src</span>=<span class="str">"./my-counter.js"</span>&gt;&lt;/<span class="tag">script</span>&gt;
 
 &lt;<span class="tag">my-counter</span>&gt;&lt;/<span class="tag">my-counter</span>&gt;</code></pre>
+    </div>
+
+    <h2>4. Run it</h2>
+    <p>
+      Browsers don't load template files when you double-click an HTML file (the
+      <code class="linha">file://</code> address). Serve the folder with any static server instead. If
+      you have Python, open a terminal in your project folder and run:
+    </p>
+    <div class="bloco-codigo">
+      <pre><code>python3 -m http.server</code></pre>
+    </div>
+    <p>
+      Then open <code class="linha">http://localhost:8000</code> in the browser and click your page.
+      Without Python, the "Live Server" extension for VS Code does the same job.
+    </p>
+    <div class="aviso">
+      <strong>Nothing showed up?</strong> Press <code class="linha">F12</code> and look at the Console
+      and Network tabs. A 404 on the <code class="linha">.html</code> template usually means the
+      <code class="linha">templateUrl</code> path is wrong — remember it is relative to the component's
+      <code class="linha">.js</code> file.
     </div>
 
     <div class="aviso">

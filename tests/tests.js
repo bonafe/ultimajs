@@ -1,6 +1,9 @@
 import { ReactiveComponent } from '../src/reactive_component.js';
 import { ComponentBase } from '../src/component_base.js';
 import { mix } from '../src/mixins.js';
+import { collectUnits, LANGUAGES, SOURCE_LANGUAGE } from '../assets/i18n.js';
+import { EXEMPLOS } from '../comparison-data.js';
+import { FRAMEWORKS, METRICS } from '../benchmarks/harness.js';
 
 //Zero-dependency test runner: each test is an async function that throws (via assert) on failure.
 
@@ -385,6 +388,63 @@ test('interpolation leaves data-bind content alone, even when the value contains
     assert(element.querySelector('#bound').textContent === '{{ count }}', element.querySelector('#bound').textContent);
     element.state = { raw: '{{ count }}', count: 10 };
     assert(element.querySelector('#bound').textContent === '{{ count }}');
+});
+
+//Site internationalization (assets/i18n.js): the dictionaries must follow the pages' English text
+
+const SITE_PAGES = ['index', 'about', 'getting-started', 'guide', 'reference', 'examples', 'comparison', 'benchmarks/index'];
+const sitePageUnits = async () => {
+    const units = [];
+    for (const page of SITE_PAGES) {
+        const doc = new DOMParser().parseFromString(await (await fetch(`../${page}.html`)).text(), 'text/html');
+        collectUnits(doc).forEach(unit => units.push({ ...unit, page }));
+    }
+    return units;
+};
+const translationLanguages = Object.keys(LANGUAGES).filter(code => code !== SOURCE_LANGUAGE);
+const loadDictionary = async code => (await import(`../assets/i18n/${code}.js`)).default;
+
+//Same tags and attributes, in the same order: a translation may reword the text, never the markup
+const markup = html => (html.match(/<[^>]+>/g) ?? []).join('');
+
+test('i18n: every text of every page has a translation in every language', async () => {
+    const units = await sitePageUnits();
+    for (const code of translationLanguages) {
+        const { strings } = await loadDictionary(code);
+        const missing = [...new Set(units.filter(unit => !(unit.source in strings)).map(unit => `${unit.page}: ${unit.source.slice(0, 70)}`))];
+        assert(!missing.length, `${code} is missing ${missing.length}:\n     ${missing.join('\n     ')}`);
+    }
+});
+
+test('i18n: translations keep the markup of the source (links, inline code, line breaks)', async () => {
+    for (const code of translationLanguages) {
+        const { strings } = await loadDictionary(code);
+        const broken = Object.entries(strings).filter(([source, translation]) => markup(source) !== markup(translation));
+        assert(!broken.length, `${code}: markup differs in ${broken.map(([source]) => source.slice(0, 60)).join(' | ')}`);
+    }
+});
+
+test('i18n: no dictionary entry is left over from text that no longer exists', async () => {
+    const used = new Set((await sitePageUnits()).map(unit => unit.source));
+    for (const code of translationLanguages) {
+        const { strings } = await loadDictionary(code);
+        const stale = Object.keys(strings).filter(source => !used.has(source));
+        assert(!stale.length, `${code} has ${stale.length} unused: ${stale.map(source => source.slice(0, 60)).join(' | ')}`);
+    }
+});
+
+test('i18n: text produced by JavaScript (comparison notes, benchmark labels) is in the dynamic dictionary', async () => {
+    const dynamic = [
+        ...EXEMPLOS.flatMap(example => Object.values(example.frameworks).map(framework => framework.nota)),
+        ...METRICS.flatMap(metric => [metric.label, metric.description]),
+        ...FRAMEWORKS.map(framework => framework.note),
+        'error', 'Running… follow the log below.', 'Benchmark complete.', 'Language'
+    ].filter(Boolean);
+    for (const code of translationLanguages) {
+        const dictionary = await loadDictionary(code);
+        const missing = dynamic.filter(text => !(text in dictionary.dynamic) && !(text in dictionary.strings));
+        assert(!missing.length, `${code} is missing: ${missing.join(' | ')}`);
+    }
 });
 
 const originalConsoleLog = console.log;

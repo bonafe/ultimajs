@@ -460,3 +460,35 @@ code.linha {
     justify-content: center;
     margin-bottom: 12px;
 }
+
+/* ---------- Internationalization (assets/i18n.js) ---------- */
+
+/* Hides the page until i18n.js has translated it, so a visitor never sees the source language flash
+   before their own. The animation reveals it anyway after 1.5s if the script never runs. */
+html:not(.i18n-ok) body {
+    opacity: 0;
+    animation: i18n-revela 0s 1.5s forwards;
+}
+@keyframes i18n-revela {
+    to { opacity: 1; }
+}
+
+.seletor-idioma {
+    background-color: transparent;
+    color: var(--cinza-400);
+    border: var(--borda-sutil);
+    border-radius: var(--raio-borda-pequeno);
+    padding: 7px 8px;
+    font: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: var(--transicao);
+}
+.seletor-idioma:hover {
+    color: var(--branco-suave);
+    background-color: var(--cinza-800);
+}
+.seletor-idioma option {
+    background-color: var(--cinza-900, #111);
+    color: var(--branco-suave);
+}

@@ -1,4 +1,5 @@
 import { EXEMPLOS, FRAMEWORKS_PAINEL } from './comparison-data.js';
+import { t, onLanguageChange } from './assets/i18n.js';
 
 const exampleTabs = document.getElementById('seletor-exemplo');
 const frameworkTabs = document.getElementById('seletor-framework');
@@ -47,7 +48,7 @@ if (exampleTabs) {
         frameworkContent.innerHTML = highlightCode(framework.codigo);
 
         if (framework.nota) {
-            frameworkNote.textContent = framework.nota;
+            frameworkNote.textContent = t(framework.nota);
             frameworkNote.hidden = false;
         } else {
             frameworkNote.hidden = true;
@@ -76,5 +77,6 @@ if (exampleTabs) {
         });
     });
 
+    onLanguageChange(render);
     render();
 }

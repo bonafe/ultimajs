@@ -154,3 +154,8 @@
     vertical-align: middle;
     white-space: nowrap;
 }
+.pilar-compacto p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--cinza-400);
+}
